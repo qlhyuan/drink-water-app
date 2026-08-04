@@ -1,6 +1,8 @@
 services:
   drink-water:
-    build: .
+    image: ghcr.io/qlhyuan/drink-water-app:latest
+    # 如需本地构建，注释掉 image 行，取消下面注释：
+    # build: .
     container_name: drink-water
     restart: unless-stopped
     ports:
