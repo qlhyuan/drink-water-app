@@ -13,6 +13,7 @@
     "setup": "npm run prisma:generate && npm run prisma:push && npm run prisma:seed"
   },
   "dependencies": {
+    "@larksuiteoapi/node-sdk": "^1.36.0",
     "@prisma/client": "^5.20.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

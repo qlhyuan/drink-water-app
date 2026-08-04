@@ -1,172 +1,148 @@
-import { Router } from 'express';
-import crypto from 'node:crypto';
-import prisma from '../prisma/client.js';
+/**
+ * 飞书长连接事件处理（WSClient 模式）
+ * - 通过 @larksuiteoapi/node-sdk 启动 WebSocket 客户端
+ * - 监听 card.action.trigger_v1：用户点击卡片按钮
+ * - 处理器返回新卡片 → SDK 自动 PATCH 原消息
+ */
+import lark from '@larksuiteoapi/node-sdk';
 import dayjs from 'dayjs';
-import { asyncHandler, ApiError } from '../utils/asyncHandler.js';
-import { buildDoneCard, updateMessage } from '../feishu/client.js';
+import prisma from '../prisma/client.js';
+import { buildDoneCard, isFeishuEnabled } from '../feishu/client.js';
 
-const router = Router();
-
-const ENCRYPT_KEY = () => process.env.FEISHU_EVENT_ENCRYPT_KEY || '';
-const VERIFICATION_TOKEN = () => process.env.FEISHU_VERIFICATION_TOKEN || '';
-
-/** 解密飞书事件 payload（AES-256-CBC，key 由 encrypt_key 经 SHA256 派生） */
-function decryptPayload(encryptStr) {
-  const raw = ENCRYPT_KEY();
-  if (!raw) throw new Error('未配置 FEISHU_EVENT_ENCRYPT_KEY');
-  const key = crypto.createHash('sha256').update(raw).digest();
-  const buf = Buffer.from(encryptStr, 'base64');
-  const iv = buf.subarray(0, 16);
-  const data = buf.subarray(16);
-  const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-  let dec = decipher.update(data);
-  dec = Buffer.concat([dec, decipher.final()]);
-  return JSON.parse(dec.toString('utf8'));
-}
+let wsClient = null;
+let larkClient = null; // 用于拿到 tenant_access_token 调更新 API（SDK 已自带，但保险起见保留）
 
 /**
- * 飞书事件订阅入口
- * 1) URL 验证：challenge 字段原样返回
- * 2) 事件回调：处理 card.action.trigger（用户点击了卡片按钮）
+ * 启动飞书长连接客户端
+ * - 未配置 FEISHU_APP_ID 时跳过
+ * - 已配置时启动 WSClient，监听 card.action.trigger_v1
  */
-router.post(
-  '/event',
-  asyncHandler(async (req, res) => {
-    // 加密传输（推荐）：body 含 { encrypt: "..." }
-    // 明文传输（开发用）：body 含 { type, event, ... }
-    let payload = req.body;
-    if (payload?.encrypt) {
-      try {
-        payload = decryptPayload(payload.encrypt);
-      } catch (e) {
-        console.error('[feishu-event] 解密失败:', e.message);
-        // 解密失败也要返回 200，避免飞书重试
-        return res.json({ code: 0, msg: 'ok' });
-      }
-    }
-
-    // 1) URL 验证
-    if (payload?.type === 'url_verification') {
-      return res.json({ challenge: payload.challenge });
-    }
-
-    // 2) 事件回调
-    const event = payload?.event || {};
-    const header = payload?.header || {};
-    console.log('[feishu-event] 收到事件 type=', header.event_type, 'event_type=', event?.type);
-
-    // 验签（可选但推荐）：Verification Token 在飞书后台"回调配置"页签里能看到
-    const expectedToken = VERIFICATION_TOKEN();
-    if (expectedToken && header.token && header.token !== expectedToken) {
-      console.warn('[feishu-event] token 校验失败');
-      return res.status(401).json({ code: -1, msg: 'invalid token' });
-    }
-
-    // 卡片按钮点击事件：event_type === 'card.action.trigger'，
-    // event 结构：{ action: { value: {...} }, context: { open_id, open_message_id }, operator: { open_id } }
-    const isCardTrigger =
-      header.event_type === 'card.action.trigger' ||
-      header.event_type === 'card.action.trigger_v1' ||
-      event?.type === 'card.action.trigger';
-    if (isCardTrigger) {
-      const action = event.action || {};
-      const value = action.value || {};
-      const ctx = event.context || {};
-      const operator = event.operator || {};
-
-      if (value.action !== 'quick_record') {
-        // 不是我们的按钮，原样 200
-        return res.json({ code: 0, msg: 'ignored' });
-      }
-
-      const userId = Number(value.userId);
-      const amount = Number(value.amount);
-      const messageId = ctx.open_message_id || action.message_id;
-
-      if (!Number.isInteger(userId) || !Number.isInteger(amount)) {
-        return res.json({ code: 0, msg: 'bad params' });
-      }
-
-      // 异步处理：先 200 应答飞书（避免超时），再写库 + 更新卡片
-      res.json({ code: 0, msg: 'accepted' });
-      handleQuickRecord(userId, amount, messageId, operator.open_id).catch((e) => {
-        console.error('[feishu-event] 处理 quick_record 失败:', e);
-      });
-      return;
-    }
-
-    // 其它事件原样 200
-    return res.json({ code: 0, msg: 'ok' });
-  }),
-);
-
-/** 写记录 + 更新原卡片为"已记录"版 */
-async function handleQuickRecord(userId, amount, messageId, operatorOpenId) {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) {
-    console.warn(`[feishu-event] 用户不存在 userId=${userId}`);
+export function startFeishuEventListener() {
+  if (!isFeishuEnabled()) {
+    console.log('[feishu-event] 未配置 FEISHU_APP_ID，长连接事件监听未启动');
     return;
   }
 
-  // 安全校验：如果卡片运营者 openId 跟用户绑定的不一致，拒绝（防止伪造）
-  if (operatorOpenId && user.feishuOpenId && operatorOpenId !== user.feishuOpenId) {
-    console.warn(
-      `[feishu-event] open_id 不匹配 user=${user.feishuOpenId} operator=${operatorOpenId}`,
-    );
-    return;
-  }
+  const appId = process.env.FEISHU_APP_ID;
+  const appSecret = process.env.FEISHU_APP_SECRET;
 
-  if (!Number.isInteger(amount) || amount < 10 || amount > 3000) {
-    console.warn(`[feishu-event] amount 非法: ${amount}`);
-    return;
-  }
+  // 业务客户端：用于在处理器里调飞书 API（如需要主动发消息）
+  larkClient = new lark.Client({ appId, appSecret, loggerLevel: lark.LoggerLevel.info });
 
-  // 写记录
-  await prisma.drinkRecord.create({
-    data: {
-      userId: user.id,
-      amount,
-      cupType: 'quick_feishu',
-      cupEmoji: '💧',
+  const eventDispatcher = new lark.EventDispatcher({
+    encryptKey: process.env.FEISHU_EVENT_ENCRYPT_KEY || '',
+    loggerLevel: lark.LoggerLevel.info,
+  }).register({
+    'card.action.trigger_v1': async (data) => {
+      console.log('[feishu-event] 收到卡片点击事件');
+      return handleQuickRecord(data);
     },
   });
 
-  // 重新计算今日累计
-  const start = dayjs().startOf('day').toDate();
-  const end = dayjs().endOf('day').toDate();
-  const agg = await prisma.drinkRecord.aggregate({
-    where: { userId: user.id, recordedAt: { gte: start, lte: end } },
-    _sum: { amount: true },
-  });
-  const drank = agg._sum.amount || 0;
-  const goal = user.goal || 2000;
-  const percent = Math.min(100, Math.round((drank / goal) * 100));
-
-  // 更新原卡片
-  if (!messageId) {
-    console.warn('[feishu-event] 没有 messageId，跳过卡片更新');
-    return;
-  }
-
-  const doneCard = buildDoneCard({
-    nickname: user.nickname || user.username,
-    drank,
-    goal,
-    percent,
-    baseUrl: baseUrl(),
-    justAdded: amount,
+  wsClient = new lark.WSClient({
+    appId,
+    appSecret,
+    loggerLevel: lark.LoggerLevel.info,
   });
 
   try {
-    await updateMessage(messageId, doneCard);
-    console.log(`[feishu-event] 已更新卡片 ${messageId}（+${amount}ml, ${drank}/${goal}ml）`);
+    wsClient.start({ eventDispatcher });
+    console.log('[feishu-event] 长连接已启动');
   } catch (e) {
-    console.error(`[feishu-event] 卡片更新失败 ${messageId}:`, e.message);
+    console.error('[feishu-event] 启动失败:', e.message);
+    // 30 秒后重试
+    setTimeout(() => startFeishuEventListener(), 30_000);
   }
 }
 
-function baseUrl() {
-  return (process.env.APP_BASE_URL || 'http://localhost:3001').replace(/\/$/, '');
+/** 停止长连接（用于 graceful shutdown） */
+export function stopFeishuEventListener() {
+  if (wsClient && typeof wsClient.disconnect === 'function') {
+    try {
+      wsClient.disconnect();
+    } catch (e) {
+      console.warn('[feishu-event] 断开失败:', e.message);
+    }
+  }
 }
 
-export default router;
+/**
+ * 处理"一键记录"按钮点击
+ * - 校验参数 + 校验操作者身份
+ * - 写库
+ * - 返回 buildDoneCard() → SDK 自动更新原卡片
+ */
+async function handleQuickRecord(data) {
+  try {
+    const event = data?.event || {};
+    const action = event.action || {};
+    const value = action.value || {};
+    const ctx = event.context || {};
+    const operator = event.operator || {};
+
+    if (value.action !== 'quick_record') {
+      return {}; // 不是我们的按钮，原样 200
+    }
+
+    const userId = Number(value.userId);
+    const amount = Number(value.amount);
+
+    if (!Number.isInteger(userId) || !Number.isInteger(amount)) {
+      console.warn('[feishu-event] 参数非法:', value);
+      return {};
+    }
+    if (amount < 10 || amount > 3000) {
+      console.warn('[feishu-event] amount 越界:', amount);
+      return {};
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      console.warn(`[feishu-event] 用户不存在 userId=${userId}`);
+      return {};
+    }
+
+    // 安全：操作者 open_id 必须匹配该用户绑定
+    if (operator.open_id && user.feishuOpenId && operator.open_id !== user.feishuOpenId) {
+      console.warn(
+        `[feishu-event] open_id 不匹配 user=${user.feishuOpenId} operator=${operator.open_id}`,
+      );
+      return {};
+    }
+
+    // 写记录
+    await prisma.drinkRecord.create({
+      data: {
+        userId: user.id,
+        amount,
+        cupType: 'quick_feishu',
+        cupEmoji: '💧',
+      },
+    });
+
+    // 重新计算今日累计
+    const start = dayjs().startOf('day').toDate();
+    const end = dayjs().endOf('day').toDate();
+    const agg = await prisma.drinkRecord.aggregate({
+      where: { userId: user.id, recordedAt: { gte: start, lte: end } },
+      _sum: { amount: true },
+    });
+    const drank = agg._sum.amount || 0;
+    const goal = user.goal || 2000;
+    const percent = Math.min(100, Math.round((drank / goal) * 100));
+
+    // 返回新卡片 → SDK 会自动更新原消息
+    console.log(`[feishu-event] 已记录 +${amount}ml user=${user.id} 进度=${drank}/${goal}ml`);
+    return buildDoneCard({
+      nickname: user.nickname || user.username,
+      drank,
+      goal,
+      percent,
+      baseUrl: (process.env.APP_BASE_URL || 'http://localhost:3001').replace(/\/$/, ''),
+      justAdded: amount,
+    });
+  } catch (e) {
+    console.error('[feishu-event] 处理失败:', e);
+    return {}; // 返回空对象表示不更新卡片
+  }
+}

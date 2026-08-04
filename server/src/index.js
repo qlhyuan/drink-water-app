@@ -15,11 +15,11 @@ import statsRoutes from './routes/stats.js';
 import cupRoutes from './routes/cups.js';
 import reminderRoutes from './routes/reminders.js';
 import feishuRoutes from './routes/feishu.js';
-import feishuEventRoutes from './routes/feishuEvent.js';
 import quickRecordRoutes from './routes/quickRecord.js';
 import { notFound, errorHandler } from './middleware/error.js';
 import { bootstrapAdmin } from './bootstrap.js';
 import { startReminderWorker } from './reminder-worker.js';
+import { startFeishuEventListener, stopFeishuEventListener } from './routes/feishuEvent.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -55,7 +55,6 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/cups', cupRoutes);
 app.use('/api/reminders', reminderRoutes);
 app.use('/api/feishu', feishuRoutes);
-app.use('/api/feishu', feishuEventRoutes);
 app.use('/api/quick-record', rateLimit({ windowMs: 60_000, max: 60 }), quickRecordRoutes);
 
 // 可选：托管前端构建产物（同步判断，确保 listen 前已挂载）
@@ -78,7 +77,17 @@ bootstrapAdmin()
   })
   .finally(() => {
     startReminderWorker();
+    startFeishuEventListener(); // 启动飞书长连接（监听卡片点击）
     app.listen(PORT, () => {
       console.log(`[server] listening on http://localhost:${PORT}`);
     });
   });
+
+// 优雅退出
+const shutdown = (signal) => {
+  console.log(`[server] 收到 ${signal}，开始优雅退出`);
+  stopFeishuEventListener();
+  process.exit(0);
+};
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
