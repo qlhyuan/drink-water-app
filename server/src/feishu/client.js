@@ -123,10 +123,12 @@ export async function sendMessage(openId, msgType, content) {
 /** 提醒消息卡片：展示进度 + 一键记录按钮（回调式） + 打开应用 */
 export function buildReminderCard({ nickname, drank, goal, percent, baseUrl, userId = 0 }) {
   // 回调式按钮：点击会 POST 到飞书事件订阅接口（不带 url）
-  const quickActions = [100, 200, 500].map((amount) => ({
+  // 2.0 已废弃 action 容器，button 直接放 elements 里，用 margin 控制间距
+  const quickButtons = [100, 200, 500].map((amount, i) => ({
     tag: 'button',
     text: { tag: 'plain_text', content: `💧 ${amount}ml` },
     type: 'default',
+    margin: i === 0 ? '8px 0 4px 0' : '4px 0', // 第一个按钮加 8px 上间距
     value: { action: 'quick_record', userId, amount },
   }));
 
@@ -146,17 +148,13 @@ export function buildReminderCard({ nickname, drank, goal, percent, baseUrl, use
             content: `**${nickname || '朋友'}**，起来喝口水吧～\n今日进度 **${drank} / ${goal} ml**（${percent}%）\n\n> 小口慢饮，保持好状态 ☺️`,
           },
         },
+        ...quickButtons,
         {
-          tag: 'action',
-          actions: [
-            ...quickActions,
-            {
-              tag: 'button',
-              text: { tag: 'plain_text', content: '📝 详细记录' },
-              type: 'primary',
-              url: baseUrl,
-            },
-          ],
+          tag: 'button',
+          text: { tag: 'plain_text', content: '📝 详细记录' },
+          type: 'primary',
+          margin: '4px 0',
+          url: baseUrl,
         },
       ],
     },
@@ -182,15 +180,11 @@ export function buildDoneCard({ nickname, drank, goal, percent, baseUrl, justAdd
           },
         },
         {
-          tag: 'action',
-          actions: [
-            {
-              tag: 'button',
-              text: { tag: 'plain_text', content: '📝 详细记录' },
-              type: 'primary',
-              url: baseUrl,
-            },
-          ],
+          tag: 'button',
+          text: { tag: 'plain_text', content: '📝 详细记录' },
+          type: 'primary',
+          margin: '8px 0 0 0',
+          url: baseUrl,
         },
       ],
     },
