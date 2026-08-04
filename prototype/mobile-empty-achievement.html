@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="common.css">
+<style>
+  .page { padding: 0 16px 80px; background: var(--bg); min-height: 100%; }
+  .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0 12px; }
+  .title { font-size: 20px; font-weight: 700; }
+  /* 顶部统计 */
+  .stats-card { background: linear-gradient(135deg, var(--brand), var(--brand-dark)); border-radius: 16px; padding: 18px 20px; color: white; margin-bottom: 16px; box-shadow: var(--shadow-brand); position: relative; overflow: hidden; }
+  .stats-card::before { content: ''; position: absolute; top: -30px; right: -30px; width: 100px; height: 100px; background: rgba(255,255,255,0.15); border-radius: 50%; }
+  .stats-label { font-size: 12px; opacity: 0.9; }
+  .stats-value { font-size: 32px; font-weight: 700; margin: 4px 0; }
+  .stats-value small { font-size: 14px; opacity: 0.85; font-weight: 400; margin-left: 4px; }
+  .stats-bar { background: rgba(255,255,255,0.25); height: 6px; border-radius: 3px; margin-top: 10px; overflow: hidden; }
+  .stats-bar-fill { background: white; height: 100%; width: 10%; border-radius: 3px; }
+  .stats-meta { display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; opacity: 0.9; }
+  /* 标签切换 */
+  .tabs { display: flex; gap: 8px; margin-bottom: 14px; background: white; border-radius: 12px; padding: 4px; box-shadow: var(--shadow); }
+  .tab { flex: 1; text-align: center; padding: 8px; font-size: 13px; font-weight: 500; color: var(--text-secondary); border-radius: 8px; }
+  .tab.active { background: var(--brand-light); color: var(--brand-dark); font-weight: 600; }
+  /* 成就网格 */
+  .ach-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .ach-card { background: white; border-radius: 12px; padding: 14px 8px; text-align: center; box-shadow: var(--shadow); position: relative; opacity: 0.45; filter: grayscale(0.8); }
+  .ach-card.unlocked { opacity: 1; filter: none; border: 2px solid var(--brand-light); }
+  .ach-icon { width: 48px; height: 48px; margin: 0 auto 8px; background: linear-gradient(135deg, #fbbf24, #f59e0b); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 12px rgba(251,191,36,0.3); }
+  .ach-card.unlocked .ach-icon { background: linear-gradient(135deg, var(--brand-light), var(--brand)); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+  .ach-name { font-size: 12px; font-weight: 600; }
+  .ach-desc { font-size: 10px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
+  .lock-badge { position: absolute; top: 6px; right: 6px; font-size: 12px; }
+  .tabbar { position: absolute; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px 0 18px; box-shadow: 0 -2px 8px rgba(0,0,0,0.06); border-top: 1px solid #f3f4f6; }
+  .tab { text-align: center; font-size: 11px; color: var(--text-tertiary); }
+  .tab.active { color: var(--brand); }
+  .tab-icon { font-size: 20px; }
+</style>
+</head>
+<body>
+<div class="page" style="position:relative;">
+  <div class="header">
+    <div class="title">成就墙</div>
+    <div style="width:36px;height:36px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);">🎯</div>
+  </div>
+
+  <div class="stats-card">
+    <div class="stats-label">已解锁成就</div>
+    <div class="stats-value">1<small>/ 12 个</small></div>
+    <div class="stats-bar"><div class="stats-bar-fill"></div></div>
+    <div class="stats-meta">
+      <span>🏆 1 个稀有徽章</span>
+      <span>继续努力！</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active">全部 (12)</div>
+    <div class="tab">已解锁 (1)</div>
+    <div class="tab">未解锁 (11)</div>
+  </div>
+
+  <div class="ach-grid">
+    <div class="ach-card unlocked">
+      <div class="ach-icon">🌱</div>
+      <div class="ach-name">初次尝试</div>
+      <div class="ach-desc">记录第一次</div>
+    </div>
+    <div class="ach-card">
+      <div class="lock-badge">🔒</div>
+      <div class="ach-icon">💧</div>
+      <div class="ach-name">小试牛刀</div>
+      <div class="ach-desc">单日喝够<br>1000ml</div>
+    </div>
+    <div class="ach-card">
+      <div class="lock-badge">🔒</div>
+      <div class="ach-icon">🎯</div>
+      <div class="ach-name">完美达标</div>
+      <div class="ach-desc">连续 7 天<br>完成目标</div>
+    </div>
+    <div class="ach-card">
+      <div class="lock-badge">🔒</div>
+      <div class="ach-icon">🔥</div>
+      <div class="ach-name">连续一周</div>
+      <div class="ach-desc">连续 7 天<br>不间断</div>
+    </div>
+    <div class="ach-card">
+      <div class="lock-badge">🔒</div>
+      <div class="ach-icon">⚡</div>
+      <div class="ach-name">闪电喝水</div>
+      <div class="ach-desc">1 小时内<br>喝 500ml</div>
+    </div>
+    <div class="ach-card">
+      <div class="lock-badge">🔒</div>
+      <div class="ach-icon">🌊</div>
+      <div class="ach-name">水之达人</div>
+      <div class="ach-desc">累计喝够<br>100L</div>
+    </div>
+    <div class="ach-card">
+      <div class="lock-badge">🔒</div>
+      <div class="ach-icon">🌅</div>
+      <div class="ach-name">晨起第一杯</div>
+      <div class="ach-desc">连续 7 天<br>8 点前喝水</div>
+    </div>
+    <div class="ach-card">
+      <div class="lock-badge">🔒</div>
+      <div class="ach-icon">🌙</div>
+      <div class="ach-name">深夜记录</div>
+      <div class="ach-desc">22 点后<br>记录一次</div>
+    </div>
+    <div class="ach-card">
+      <div class="lock-badge">🔒</div>
+      <div class="ach-icon">💎</div>
+      <div class="ach-name">30 天坚持</div>
+      <div class="ach-desc">连续 30 天<br>完成目标</div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab"><div class="tab-icon">💧</div>首页</div>
+    <div class="tab"><div class="tab-icon">📊</div>历史</div>
+    <div class="tab active"><div class="tab-icon">🏆</div>成就</div>
+    <div class="tab"><div class="tab-icon">👤</div>我的</div>
+  </div>
+</div>
+</body>
+</html>

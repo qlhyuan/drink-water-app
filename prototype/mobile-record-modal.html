@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="common.css">
+<style>
+  .page { padding: 0; background: #f3f4f6; min-height: 100%; position: relative; }
+  /* 背景模糊层 */
+  .bg-blur { padding: 16px; min-height: 100%; filter: blur(2px); opacity: 0.55; }
+  .bg-header { display: flex; justify-content: space-between; padding: 8px 0 12px; }
+  .bg-card { background: white; border-radius: 16px; height: 120px; margin-bottom: 12px; box-shadow: var(--shadow); }
+  /* 底部弹层 */
+  .sheet { position: absolute; bottom: 0; left: 0; right: 0; background: white; border-radius: 24px 24px 0 0; padding: 16px 20px 32px; box-shadow: 0 -8px 32px rgba(0,0,0,0.12); animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .grabber { width: 40px; height: 4px; background: #e5e7eb; border-radius: 2px; margin: 0 auto 14px; }
+  .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .sheet-title { font-size: 16px; font-weight: 700; }
+  .sheet-close { width: 28px; height: 28px; border-radius: 50%; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text-secondary); }
+  /* 大数字显示 */
+  .amount-display { text-align: center; padding: 12px 0 20px; }
+  .amount-value { font-size: 56px; font-weight: 700; color: var(--brand); line-height: 1; font-variant-numeric: tabular-nums; }
+  .amount-unit { font-size: 16px; color: var(--text-secondary); margin-left: 4px; }
+  .amount-meta { font-size: 12px; color: var(--text-tertiary); margin-top: 6px; }
+  /* 步进调节器 */
+  .stepper { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 20px; }
+  .step-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--brand-light); color: var(--brand-dark); font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 0; }
+  .step-btn.primary { width: 60px; height: 60px; background: var(--brand); color: white; font-size: 28px; box-shadow: var(--shadow-brand); }
+  .step-display { font-size: 36px; font-weight: 700; min-width: 100px; text-align: center; }
+  /* 快捷量 */
+  .quick-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .quick-chip { flex: 1; background: #f3f4f6; border-radius: 10px; padding: 10px; text-align: center; font-size: 13px; font-weight: 600; }
+  .quick-chip.active { background: var(--brand-light); color: var(--brand-dark); border: 1px solid var(--brand); }
+  /* 杯型选择 */
+  .cup-row { display: flex; gap: 12px; margin-bottom: 18px; overflow-x: auto; }
+  .cup-pick { flex: 1; min-width: 70px; background: white; border: 2px solid #f3f4f6; border-radius: 12px; padding: 10px 6px; text-align: center; }
+  .cup-pick.active { border-color: var(--brand); background: var(--brand-light); }
+  .cup-pick-icon { font-size: 22px; }
+  .cup-pick-name { font-size: 11px; font-weight: 600; margin-top: 4px; }
+  .cup-pick-cap { font-size: 10px; color: var(--text-secondary); }
+  /* 提交按钮 */
+  .submit-btn { width: 100%; background: linear-gradient(135deg, var(--brand), var(--brand-dark)); color: white; border-radius: 14px; padding: 16px; font-size: 16px; font-weight: 700; border: 0; box-shadow: var(--shadow-brand); }
+  .submit-time { text-align: center; font-size: 12px; color: var(--text-tertiary); margin-bottom: 12px; }
+  .submit-time .now { color: var(--brand); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="bg-blur">
+    <div class="bg-header">
+      <div style="font-size:20px;font-weight:700;">今天喝水啦</div>
+      <div style="width:36px;height:36px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;">🔔</div>
+    </div>
+    <div class="bg-card"></div>
+    <div class="bg-card" style="height:80px;"></div>
+    <div class="bg-card" style="height:200px;"></div>
+  </div>
+
+  <div class="sheet">
+    <div class="grabber"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">记录一次喝水</div>
+      <div class="sheet-close">✕</div>
+    </div>
+
+    <div class="amount-display">
+      <span class="amount-value">250</span><span class="amount-unit">ml</span>
+      <div class="amount-meta">≈ 1 杯马克杯</div>
+    </div>
+
+    <div class="stepper">
+      <button class="step-btn">−</button>
+      <div class="step-display">250</div>
+      <button class="step-btn primary">+</button>
+    </div>
+
+    <div class="quick-row">
+      <div class="quick-chip">100</div>
+      <div class="quick-chip active">250</div>
+      <div class="quick-chip">500</div>
+      <div class="quick-chip">750</div>
+    </div>
+
+    <div class="cup-row">
+      <div class="cup-pick"><div class="cup-pick-icon">🥛</div><div class="cup-pick-name">马克杯</div><div class="cup-pick-cap">250ml</div></div>
+      <div class="cup-pick active"><div class="cup-pick-icon">🧴</div><div class="cup-pick-name">保温杯</div><div class="cup-pick-cap">500ml</div></div>
+      <div class="cup-pick"><div class="cup-pick-icon">🍶</div><div class="cup-pick-name">瓶装水</div><div class="cup-pick-cap">550ml</div></div>
+      <div class="cup-pick"><div class="cup-pick-icon">🫙</div><div class="cup-pick-name">大瓶</div><div class="cup-pick-cap">1500ml</div></div>
+    </div>
+
+    <div class="submit-time">记录于 <span class="now">14:32</span></div>
+    <button class="submit-btn">💧 完成记录</button>
+  </div>
+</div>
+</body>
+</html>

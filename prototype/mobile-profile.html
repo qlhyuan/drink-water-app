@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="common.css">
+<style>
+  .page { padding: 0 16px 80px; background: var(--bg); min-height: 100%; }
+  .topbar { display: flex; align-items: center; padding: 14px 0; }
+  .topbar-title { font-size: 16px; font-weight: 600; margin: 0 auto; }
+  .user-card { background: linear-gradient(135deg, var(--brand), var(--brand-dark)); border-radius: 20px; padding: 24px; display: flex; align-items: center; color: white; box-shadow: var(--shadow-brand); margin-bottom: 16px; }
+  .avatar { width: 60px; height: 60px; border-radius: 50%; background: var(--brand-light); border: 3px solid white; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-right: 16px; }
+  .user-info { flex: 1; }
+  .nickname { font-size: 18px; font-weight: 700; }
+  .user-meta { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+  .menu-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); margin-bottom: 16px; }
+  .menu-item { display: flex; align-items: center; padding: 16px; border-bottom: 1px solid #f3f4f6; }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-icon { font-size: 16px; margin-right: 12px; }
+  .menu-label { flex: 1; font-size: 14px; }
+  .menu-arrow { color: var(--text-tertiary); font-size: 18px; }
+  .logout { text-align: center; padding: 14px; background: white; border-radius: 12px; box-shadow: var(--shadow); color: #ef4444; font-size: 14px; font-weight: 600; }
+  .version { text-align: center; padding: 16px; font-size: 11px; color: var(--text-tertiary); }
+  .tabbar { position: absolute; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px 0 18px; box-shadow: 0 -2px 8px rgba(0,0,0,0.06); border-top: 1px solid #f3f4f6; }
+  .tab { text-align: center; font-size: 11px; color: var(--text-tertiary); }
+  .tab.active { color: var(--brand); }
+  .tab-icon { font-size: 20px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="topbar-title">我的</div>
+  </div>
+
+  <div class="user-card">
+    <div class="avatar">👤</div>
+    <div class="user-info">
+      <div class="nickname">喝水达人</div>
+      <div class="user-meta">坚持喝水每一天 💧</div>
+    </div>
+  </div>
+
+  <div class="menu-card">
+    <div class="menu-item">
+      <div class="menu-icon">🎯</div>
+      <div class="menu-label">目标设置</div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon">🔔</div>
+      <div class="menu-label">提醒设置</div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon">🏆</div>
+      <div class="menu-label">我的成就</div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon">📊</div>
+      <div class="menu-label">健康周报</div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon">📤</div>
+      <div class="menu-label">分享给好友</div>
+      <div class="menu-arrow">›</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon">⚙️</div>
+      <div class="menu-label">账号设置</div>
+      <div class="menu-arrow">›</div>
+    </div>
+  </div>
+
+  <div class="logout">退出登录</div>
+
+  <div class="version">每日喝水 v1.0.0 · 让喝水变成习惯</div>
+
+  <div class="tabbar">
+    <div class="tab"><div class="tab-icon">💧</div>首页</div>
+    <div class="tab"><div class="tab-icon">📊</div>历史</div>
+    <div class="tab"><div class="tab-icon">🏆</div>成就</div>
+    <div class="tab active"><div class="tab-icon">👤</div>我的</div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+/* 共享样式 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --brand: #10b981;
+  --brand-light: #d1fae5;
+  --brand-dark: #047857;
+  --text: #1f2937;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --bg: #f8fafc;
+  --bg-card: #ffffff;
+  --border: #e5e7eb;
+  --shadow: 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-brand: 0 8px 24px rgba(16,185,129,0.25);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}

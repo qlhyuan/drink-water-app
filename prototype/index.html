@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日喝水 - 原型预览</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+    background: #f3f4f6;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 32px;
+    color: #1f2937;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .subtitle {
+    text-align: center;
+    color: #6b7280;
+    margin-bottom: 40px;
+    font-size: 14px;
+  }
+  .viewport-group {
+    margin-bottom: 60px;
+  }
+  .viewport-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e5e7eb;
+  }
+  .viewport-label .icon {
+    width: 36px;
+    height: 36px;
+    background: #10b981;
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .viewport-label h2 {
+    font-size: 20px;
+    color: #1f2937;
+  }
+  .viewport-label .meta {
+    color: #9ca3af;
+    font-size: 13px;
+    margin-left: auto;
+  }
+  .screens {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  /* 移动端 */
+  .mobile-frame {
+    width: 375px;
+    background: #ffffff;
+    border-radius: 28px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+    border: 8px solid #1f2937;
+  }
+  .mobile-frame .header {
+    height: 28px;
+    background: #1f2937;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    color: white;
+    font-size: 11px;
+  }
+  .mobile-frame .screen {
+    height: 700px;
+    overflow: hidden;
+    background: #f8fafc;
+  }
+  .mobile-frame .screen iframe {
+    overflow: hidden;
+  }
+  /* 桌面端 */
+  .desktop-frame {
+    width: 1200px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+  }
+  .desktop-frame .chrome {
+    height: 32px;
+    background: #f3f4f6;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 8px;
+  }
+  .desktop-frame .chrome .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #d1d5db;
+  }
+  .desktop-frame .chrome .dot.red { background: #ef4444; }
+  .desktop-frame .chrome .dot.yellow { background: #fbbf24; }
+  .desktop-frame .chrome .dot.green { background: #10b981; }
+  .desktop-frame .chrome .url {
+    margin-left: 16px;
+    background: white;
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: #6b7280;
+    flex: 1;
+  }
+  .desktop-frame .screen {
+    height: 760px;
+    overflow-y: auto;
+    background: #f8fafc;
+  }
+  .screen-name {
+    text-align: center;
+    padding: 8px 0;
+    background: #1f2937;
+    color: #d1d5db;
+    font-size: 12px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>💧 每日喝水 - Web 版原型</h1>
+  <p class="subtitle">响应式设计 · 移动端 + 桌面端</p>
+
+  <!-- ============================================ -->
+  <!-- 移动端首页 -->
+  <!-- ============================================ -->
+  <div class="viewport-group">
+    <div class="viewport-label">
+      <div class="icon">📱</div>
+      <h2>移动端 - 首页</h2>
+      <span class="meta">375 × 700</span>
+    </div>
+    <div class="screens">
+      <div class="mobile-frame">
+        <div class="header"><span>9:41</span><span>📶 100%</span></div>
+        <div class="screen">
+          <iframe src="mobile-home.html" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 移动端 - 历史 / 目标 / 成就 / 个人 -->
+  <!-- ============================================ -->
+  <div class="viewport-group">
+    <div class="viewport-label">
+      <div class="icon">📱</div>
+      <h2>移动端 - 主要页面</h2>
+      <span class="meta">并排展示</span>
+    </div>
+    <div class="screens">
+      <div class="mobile-frame">
+        <div class="header"><span>9:41</span><span>📶 100%</span></div>
+        <div class="screen">
+          <iframe src="mobile-history.html" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+      <div class="mobile-frame">
+        <div class="header"><span>9:41</span><span>📶 100%</span></div>
+        <div class="screen">
+          <iframe src="mobile-goal.html" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+      <div class="mobile-frame">
+        <div class="header"><span>9:41</span><span>📶 100%</span></div>
+        <div class="screen">
+          <iframe src="mobile-achievement.html" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+      <div class="mobile-frame">
+        <div class="header"><span>9:41</span><span>📶 100%</span></div>
+        <div class="screen">
+          <iframe src="mobile-profile.html" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 桌面端 - 整体布局 -->
+  <!-- ============================================ -->
+  <div class="viewport-group">
+    <div class="viewport-label">
+      <div class="icon">🖥️</div>
+      <h2>桌面端 - 首页（含侧边栏）</h2>
+      <span class="meta">1200 × 760</span>
+    </div>
+    <div class="screens">
+      <div class="desktop-frame">
+        <div class="chrome">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+          <span class="url">drink-water.local</span>
+        </div>
+        <div class="screen">
+          <iframe src="desktop-home.html" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="viewport-group">
+    <div class="viewport-label">
+      <div class="icon">🖥️</div>
+      <h2>桌面端 - 登录页</h2>
+      <span class="meta">账号密码登录</span>
+    </div>
+    <div class="screens">
+      <div class="desktop-frame">
+        <div class="chrome">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+          <span class="url">drink-water.local/login</span>
+        </div>
+        <div class="screen">
+          <iframe src="desktop-login.html" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="viewport-group">
+    <div class="viewport-label">
+      <div class="icon">🖥️</div>
+      <h2>桌面端 - 历史页（含侧边栏）</h2>
+      <span class="meta">完整页面</span>
+    </div>
+    <div class="screens">
+      <div class="desktop-frame">
+        <div class="chrome">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+          <span class="url">drink-water.local/history</span>
+        </div>
+        <div class="screen">
+          <iframe src="desktop-history.html" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 移动端 - 引导 / 弹窗 / 设置 / 空状态 / 加载 -->
+  <!-- ============================================ -->
+  <div class="viewport-group">
+    <div class="viewport-label">
+      <div class="icon">✨</div>
+      <h2>移动端 - 引导 & 首次使用</h2>
+      <span class="meta">新增 · 3 步引导</span>
+    </div>
+    <div class="screens">
+      <div class="mobile-frame">
+        <div class="header"><span>9:41</span><span>📶 100%</span></div>
+        <div class="screen">
+          <iframe src="mobile-onboarding.html" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="viewport-group">
+    <div class="viewport-label">
+      <div class="icon">💧</div>
+      <h2>移动端 - 记录喝水弹窗</h2>
+      <span class="meta">新增 · 底部 Action Sheet</span>
+    </div>
+    <div class="screens">
+      <div class="mobile-frame">
+        <div class="header"><span>9:41</span><span>📶 100%</span></div>
+        <div class="screen">
+          <iframe src="mobile-record-modal.html" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="viewport-group">
+    <div class="viewport-label">
+      <div class="icon">🔔</div>
+      <h2>移动端 - 提醒设置</h2>
+      <span class="meta">新增 · 智能提醒</span>
+    </div>
+    <div class="screens">
+      <div class="mobile-frame">
+        <div class="header"><span>9:41</span><span>📶 100%</span></div>
+        <div class="screen">
+          <iframe src="mobile-reminder.html" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="viewport-group">
+    <div class="viewport-label">
+      <div class="icon">📭</div>
+      <h2>移动端 - 空状态（历史 / 成就）</h2>
+      <span class="meta">新增 · 2 个空状态</span>
+    </div>
+    <div class="screens">
+      <div class="mobile-frame">
+        <div class="header"><span>9:41</span><span>📶 100%</span></div>
+        <div class="screen">
+          <iframe src="mobile-empty-history.html" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+      <div class="mobile-frame">
+        <div class="header"><span>9:41</span><span>📶 100%</span></div>
+        <div class="screen">
+          <iframe src="mobile-empty-achievement.html" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="viewport-group">
+    <div class="viewport-label">
+      <div class="icon">⏳</div>
+      <h2>移动端 - 加载状态（骨架屏）</h2>
+      <span class="meta">新增 · shimmer 动画</span>
+    </div>
+    <div class="screens">
+      <div class="mobile-frame">
+        <div class="header"><span>9:41</span><span>📶 100%</span></div>
+        <div class="screen">
+          <iframe src="mobile-loading.html" style="width:100%;height:100%;border:0;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

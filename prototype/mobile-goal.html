@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="common.css">
+<style>
+  .page { padding: 0 16px 80px; background: var(--bg); min-height: 100%; }
+  .topbar { display: flex; align-items: center; padding: 14px 0; }
+  .back { font-size: 18px; margin-right: 12px; }
+  .topbar-title { font-size: 16px; font-weight: 600; }
+  .card { background: white; border-radius: 16px; padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px; }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+  .goal-display { text-align: center; padding: 20px 0; }
+  .goal-value { font-size: 48px; font-weight: 700; color: var(--brand); line-height: 1; }
+  .goal-unit { font-size: 14px; color: var(--text-secondary); margin-left: 4px; }
+  .slider-wrap { padding: 0 8px; }
+  .slider { width: 100%; height: 4px; background: #e5e7eb; border-radius: 2px; appearance: none; }
+  .slider::-webkit-slider-thumb { appearance: none; width: 20px; height: 20px; background: var(--brand); border-radius: 50%; cursor: pointer; }
+  .slider-range { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-tertiary); margin-top: 8px; }
+  .preset-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .preset { background: #f8fafc; border-radius: 8px; padding: 12px 4px; text-align: center; border: 2px solid transparent; }
+  .preset.active { background: #ecfdf5; border-color: var(--brand); }
+  .preset-value { font-size: 15px; font-weight: 700; }
+  .preset-label { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+  .form-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; }
+  .form-label { font-size: 13px; }
+  .form-value { font-size: 16px; font-weight: 700; color: var(--brand); }
+  .activity-row { display: flex; gap: 8px; margin: 12px 0; }
+  .activity { flex: 1; background: #f8fafc; border-radius: 8px; padding: 12px 8px; text-align: center; border: 2px solid transparent; }
+  .activity.active { background: #ecfdf5; border-color: var(--brand); }
+  .activity-icon { font-size: 24px; }
+  .activity-label { font-size: 11px; margin-top: 4px; }
+  .recommend { background: linear-gradient(135deg, #d1fae5, #a7f3d0); border-radius: 12px; padding: 16px; display: flex; justify-content: space-between; align-items: center; margin: 16px 0; }
+  .recommend-label { font-size: 12px; color: var(--brand-dark); }
+  .recommend-value { font-size: 18px; font-weight: 700; color: var(--brand-dark); }
+  .use-recommend { text-align: center; font-size: 13px; color: var(--brand); font-weight: 600; padding: 8px 0; }
+  .save-btn { width: 100%; background: linear-gradient(135deg, var(--brand), var(--brand-dark)); color: white; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 600; box-shadow: var(--shadow-brand); border: 0; margin-top: 16px; }
+  .tabbar { position: absolute; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px 0 18px; box-shadow: 0 -2px 8px rgba(0,0,0,0.06); border-top: 1px solid #f3f4f6; }
+  .tab { text-align: center; font-size: 11px; color: var(--text-tertiary); }
+  .tab.active { color: var(--brand); }
+  .tab-icon { font-size: 20px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="back">‹</div>
+    <div class="topbar-title">目标设置</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">每日饮水目标</div>
+    <div class="goal-display">
+      <span class="goal-value">1500</span>
+      <span class="goal-unit">ml</span>
+    </div>
+    <div class="slider-wrap">
+      <div class="slider"></div>
+      <div class="slider-range">
+        <span>500ml</span>
+        <span>4000ml</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">快捷选择</div>
+    <div class="preset-grid">
+      <div class="preset"><div class="preset-value">1000</div><div class="preset-label">低量</div></div>
+      <div class="preset active"><div class="preset-value">1500</div><div class="preset-label">标准</div></div>
+      <div class="preset"><div class="preset-value">2000</div><div class="preset-label">充足</div></div>
+      <div class="preset"><div class="preset-value">2500</div><div class="preset-label">高量</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">智能推荐</div>
+    <div class="form-row">
+      <div class="form-label">体重</div>
+      <div class="form-value">60 kg</div>
+    </div>
+    <div class="activity-row">
+      <div class="activity"><div class="activity-icon">🛋️</div><div class="activity-label">久坐</div></div>
+      <div class="activity active"><div class="activity-icon">🚶</div><div class="activity-label">一般</div></div>
+      <div class="activity"><div class="activity-icon">🏃</div><div class="activity-label">活跃</div></div>
+    </div>
+    <div class="recommend">
+      <div class="recommend-label">推荐量</div>
+      <div class="recommend-value">2100 ml</div>
+    </div>
+    <div class="use-recommend">采用推荐值</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">周目标</div>
+    <div class="form-row">
+      <div class="form-label">每周达成天数</div>
+      <div class="form-value">5 天</div>
+    </div>
+  </div>
+
+  <button class="save-btn">保存设置</button>
+
+  <div class="tabbar">
+    <div class="tab active"><div class="tab-icon">💧</div>首页</div>
+    <div class="tab"><div class="tab-icon">📊</div>历史</div>
+    <div class="tab"><div class="tab-icon">🏆</div>成就</div>
+    <div class="tab"><div class="tab-icon">👤</div>我的</div>
+  </div>
+</div>
+</body>
+</html>

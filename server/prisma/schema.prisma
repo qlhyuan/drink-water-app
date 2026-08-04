@@ -1,0 +1,78 @@
+// Prisma schema for 每日喝水
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  username     String        @unique
+  passwordHash String        @map("password_hash")
+  nickname     String?
+  avatar       String?
+  weight       Float?        // kg, used for goal recommendation
+  activity     String?       // sedentary / light / intense
+  environment  String?       // ac / normal / outdoor
+  goal         Int           @default(2000) // ml
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  records      DrinkRecord[]
+  cups         CustomCup[]
+  settings     ReminderSetting?
+
+  @@map("users")
+}
+
+model DrinkRecord {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  amount    Int      // ml
+  cupType   String?  @map("cup_type")   // cup name, e.g. "马克杯"
+  cupEmoji  String?  @map("cup_emoji")
+  recordedAt DateTime @default(now()) @map("recorded_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, recordedAt])
+  @@map("drink_records")
+}
+
+model CustomCup {
+  id        Int     @id @default(autoincrement())
+  userId    Int     @map("user_id")
+  name      String
+  capacity  Int     // ml
+  emoji     String  @default("🥤")
+  sort      Int     @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("custom_cups")
+}
+
+model ReminderSetting {
+  id           Int     @id @default(autoincrement())
+  userId       Int     @unique @map("user_id")
+  enabled      Boolean @default(true)
+  interval     Int     @default(60) // minutes
+  startTime    String  @default("08:00") @map("start_time")
+  endTime      String  @default("22:00") @map("end_time")
+  vibrate      Boolean @default(true)
+  dnd          Boolean @default(true)  // do-not-disturb at night
+  inApp        Boolean @default(true)  @map("in_app")
+  browser      Boolean @default(false)
+  sound        Boolean @default(true)
+  smartMode    Boolean @default(true)  @map("smart_mode")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("reminder_settings")
+}

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="common.css">
+<style>
+  body { display: flex; }
+  .sidebar { width: 220px; background: white; border-right: 1px solid var(--border); padding: 24px 0; height: 760px; flex-shrink: 0; }
+  .logo { display: flex; align-items: center; gap: 8px; padding: 0 20px 24px; border-bottom: 1px solid #f3f4f6; }
+  .logo-icon { font-size: 24px; }
+  .logo-text { font-size: 16px; font-weight: 700; }
+  .nav { padding: 16px 12px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 14px; color: var(--text-secondary); cursor: pointer; }
+  .nav-item.active { background: #ecfdf5; color: var(--brand); font-weight: 600; }
+  .nav-icon { font-size: 18px; }
+  .main { flex: 1; padding: 24px 32px; overflow-y: auto; }
+  .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .page-title { font-size: 24px; font-weight: 700; }
+  .tabs { display: inline-flex; background: white; border-radius: 10px; padding: 4px; box-shadow: var(--shadow); }
+  .tab { padding: 6px 16px; font-size: 13px; color: var(--text-secondary); border-radius: 6px; cursor: pointer; }
+  .tab.active { background: var(--brand); color: white; font-weight: 600; }
+  .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .summary-card { background: white; border-radius: 16px; padding: 20px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+  .summary-card::before { content: ''; position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: var(--brand-light); border-radius: 50%; opacity: 0.4; }
+  .summary-label { font-size: 13px; color: var(--text-secondary); }
+  .summary-value { font-size: 32px; font-weight: 700; color: var(--brand); margin-top: 8px; position: relative; }
+  .summary-trend { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .chart-section { background: white; border-radius: 16px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 16px; }
+  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .chart-title { font-size: 16px; font-weight: 600; }
+  .chart { display: flex; justify-content: space-between; align-items: flex-end; height: 240px; padding: 0 16px; border-bottom: 1px solid #f3f4f6; padding-bottom: 8px; }
+  .bar { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; margin: 0 6px; }
+  .bar-value { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; height: 20px; }
+  .bar-value.success { color: var(--brand); font-weight: 700; }
+  .bar-track { width: 24px; flex: 1; background: #f3f4f6; border-radius: 6px; display: flex; align-items: flex-end; }
+  .bar-fill { width: 100%; background: linear-gradient(0deg, var(--brand), #34d399); border-radius: 6px; }
+  .bar-label { font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+  .heatmap-section { background: white; border-radius: 16px; padding: 24px; box-shadow: var(--shadow); }
+  .heatmap { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; margin-top: 16px; }
+  .cell { aspect-ratio: 1; background: #f3f4f6; border-radius: 3px; }
+  .cell.l1 { background: #d1fae5; }
+  .cell.l2 { background: #6ee7b7; }
+  .cell.l3 { background: var(--brand); }
+  .legend { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin-top: 12px; font-size: 12px; color: var(--text-secondary); }
+  .legend-cell { width: 14px; height: 14px; border-radius: 3px; background: #f3f4f6; }
+  .legend-cell.l1 { background: #d1fae5; }
+  .legend-cell.l2 { background: #6ee7b7; }
+  .legend-cell.l3 { background: var(--brand); }
+</style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo">
+      <span class="logo-icon">💧</span>
+      <span class="logo-text">每日喝水</span>
+    </div>
+    <div class="nav">
+      <div class="nav-item"><span class="nav-icon">💧</span>首页</div>
+      <div class="nav-item active"><span class="nav-icon">📊</span>历史</div>
+      <div class="nav-item"><span class="nav-icon">🎯</span>目标</div>
+      <div class="nav-item"><span class="nav-icon">🔔</span>提醒</div>
+      <div class="nav-item"><span class="nav-icon">🏆</span>成就</div>
+      <div class="nav-item"><span class="nav-icon">👤</span>我的</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="page-header">
+      <div class="page-title">历史统计</div>
+      <div class="tabs">
+        <div class="tab active">近 7 天</div>
+        <div class="tab">近 30 天</div>
+        <div class="tab">90 天</div>
+        <div class="tab">健康周报</div>
+      </div>
+    </div>
+
+    <div class="summary">
+      <div class="summary-card">
+        <div class="summary-label">完成率</div>
+        <div class="summary-value">85%</div>
+        <div class="summary-trend">较上周 +5%</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">连续天数</div>
+        <div class="summary-value">🔥 7</div>
+        <div class="summary-trend">再坚持 23 天</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">日均饮水量</div>
+        <div class="summary-value">1320ml</div>
+        <div class="summary-trend">达标 5/7 天</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">本周累计</div>
+        <div class="summary-value">9240ml</div>
+        <div class="summary-trend">较上周 +12%</div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <div class="chart-header">
+        <div class="chart-title">每日饮水量</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">目标：1500ml</div>
+      </div>
+      <div class="chart">
+        <div class="bar"><div class="bar-value">900</div><div class="bar-track"><div class="bar-fill" style="height:60%"></div></div><div class="bar-label">周一</div></div>
+        <div class="bar"><div class="bar-value">1500</div><div class="bar-track"><div class="bar-fill" style="height:100%"></div></div><div class="bar-label">周二</div></div>
+        <div class="bar"><div class="bar-value">1200</div><div class="bar-track"><div class="bar-fill" style="height:80%"></div></div><div class="bar-label">周三</div></div>
+        <div class="bar"><div class="bar-value success">1600</div><div class="bar-track"><div class="bar-fill" style="height:100%"></div></div><div class="bar-label">周四</div></div>
+        <div class="bar"><div class="bar-value">1100</div><div class="bar-track"><div class="bar-fill" style="height:73%"></div></div><div class="bar-label">周五</div></div>
+        <div class="bar"><div class="bar-value success">1700</div><div class="bar-track"><div class="bar-fill" style="height:100%"></div></div><div class="bar-label">周六</div></div>
+        <div class="bar"><div class="bar-value success">1050</div><div class="bar-track"><div class="bar-fill" style="height:70%; opacity: 0.6;"></div></div><div class="bar-label">周日</div></div>
+      </div>
+    </div>
+
+    <div class="heatmap-section">
+      <div class="chart-header">
+        <div class="chart-title">打卡热力图（近 14 周）</div>
+      </div>
+      <div class="heatmap">
+        <!-- 14周 x 7天 已简化为同一区域，模拟真实效果 -->
+        <div class="cell l1"></div><div class="cell l2"></div><div class="cell l3"></div><div class="cell l2"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l1"></div>
+        <div class="cell l2"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l1"></div><div class="cell l2"></div><div class="cell" style="background:#f3f4f6"></div><div class="cell l3"></div>
+        <div class="cell l3"></div><div class="cell l1"></div><div class="cell l2"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l2"></div><div class="cell l3"></div>
+        <div class="cell l2"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l1"></div><div class="cell l2"></div><div class="cell l3"></div>
+        <div class="cell l3"></div><div class="cell l2"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l2"></div>
+        <div class="cell l2"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l2"></div><div class="cell l3"></div><div class="cell l1"></div><div class="cell l3"></div>
+        <div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l2"></div><div class="cell l3"></div><div class="cell l3"></div>
+        <div class="cell l3"></div><div class="cell l3"></div><div class="cell l1"></div><div class="cell l2"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l2"></div>
+        <div class="cell l2"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l1"></div><div class="cell l2"></div>
+        <div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l2"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div>
+        <div class="cell l1"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l2"></div><div class="cell l3"></div>
+        <div class="cell l3"></div><div class="cell l2"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l2"></div><div class="cell l3"></div><div class="cell l3"></div>
+        <div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l2"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div>
+        <div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l3"></div><div class="cell l1"></div><div class="cell l2"></div>
+      </div>
+      <div class="legend">
+        少
+        <div class="legend-cell"></div>
+        <div class="legend-cell l1"></div>
+        <div class="legend-cell l2"></div>
+        <div class="legend-cell l3"></div>
+        多
+      </div>
+    </div>
+  </div>
+</body>
+</html>

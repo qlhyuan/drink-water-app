@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="common.css">
+<style>
+  body { display: flex; }
+  .sidebar { width: 220px; background: white; border-right: 1px solid var(--border); padding: 24px 0; height: 760px; flex-shrink: 0; }
+  .logo { display: flex; align-items: center; gap: 8px; padding: 0 20px 24px; border-bottom: 1px solid #f3f4f6; }
+  .logo-icon { font-size: 24px; }
+  .logo-text { font-size: 16px; font-weight: 700; color: var(--text); }
+  .nav { padding: 16px 12px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 14px; color: var(--text-secondary); cursor: pointer; }
+  .nav-item:hover { background: #f8fafc; }
+  .nav-item.active { background: #ecfdf5; color: var(--brand); font-weight: 600; }
+  .nav-icon { font-size: 18px; }
+  .main { flex: 1; padding: 24px 32px; overflow-y: auto; }
+  .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .page-title { font-size: 24px; font-weight: 700; }
+  .user-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: white; border-radius: 999px; box-shadow: var(--shadow); }
+  .user-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--brand-light); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .content-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; }
+  .card { background: white; border-radius: 16px; padding: 24px; box-shadow: var(--shadow); }
+  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .progress-row { display: flex; align-items: center; gap: 24px; }
+  .ring { width: 160px; height: 160px; border-radius: 50%; background: conic-gradient(var(--brand) 0deg 252deg, #e5e7eb 252deg 360deg); display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; }
+  .ring::before { content: ''; position: absolute; inset: 12px; background: white; border-radius: 50%; }
+  .ring-inner { position: relative; z-index: 2; text-align: center; }
+  .ring-value { font-size: 36px; font-weight: 700; line-height: 1; }
+  .ring-target { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  .progress-info { flex: 1; }
+  .remain { font-size: 14px; color: var(--text-secondary); margin-bottom: 4px; }
+  .encourage { font-size: 20px; font-weight: 600; margin-bottom: 12px; }
+  .stat-row { display: flex; gap: 16px; margin-top: 16px; }
+  .stat-item { background: #f8fafc; border-radius: 12px; padding: 12px 16px; flex: 1; }
+  .stat-label { font-size: 12px; color: var(--text-secondary); }
+  .stat-value { font-size: 22px; font-weight: 700; color: var(--brand); margin-top: 4px; }
+  .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .quick-item { background: white; border-radius: 12px; padding: 16px 8px; text-align: center; box-shadow: var(--shadow); border: 2px solid transparent; cursor: pointer; }
+  .quick-item.highlight { background: var(--brand); border-color: var(--brand); box-shadow: var(--shadow-brand); }
+  .quick-value { font-size: 22px; font-weight: 700; }
+  .quick-item.highlight .quick-value { color: white; }
+  .quick-unit { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .quick-item.highlight .quick-unit { color: var(--brand-light); }
+  .cup-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 16px; }
+  .cup-card { background: white; border-radius: 12px; padding: 16px 8px; text-align: center; box-shadow: var(--shadow); cursor: pointer; }
+  .cup-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); transition: all 0.2s; }
+  .cup-icon { font-size: 32px; }
+  .cup-name { font-size: 13px; font-weight: 600; margin-top: 4px; }
+  .cup-cap { font-size: 11px; color: var(--text-secondary); }
+  .records { background: white; border-radius: 16px; padding: 24px; box-shadow: var(--shadow); margin-top: 16px; }
+  .record-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+  .record-row:last-child { border-bottom: none; }
+  .record-dot { width: 8px; height: 8px; background: var(--brand); border-radius: 50%; margin-right: 12px; }
+  .record-name { flex: 1; font-size: 14px; }
+  .record-time { font-size: 12px; color: var(--text-tertiary); margin-right: 16px; }
+  .record-amount { font-size: 14px; font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo">
+      <span class="logo-icon">💧</span>
+      <span class="logo-text">每日喝水</span>
+    </div>
+    <div class="nav">
+      <div class="nav-item active"><span class="nav-icon">💧</span>首页</div>
+      <div class="nav-item"><span class="nav-icon">📊</span>历史</div>
+      <div class="nav-item"><span class="nav-icon">🎯</span>目标</div>
+      <div class="nav-item"><span class="nav-icon">🔔</span>提醒</div>
+      <div class="nav-item"><span class="nav-icon">🏆</span>成就</div>
+      <div class="nav-item"><span class="nav-icon">👤</span>我的</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="page-header">
+      <div class="page-title">早上好，开始喝水吧 👋</div>
+      <div class="user-chip">
+        <div class="user-avatar">👤</div>
+        <div class="user-name">喝水达人</div>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <div class="card">
+        <div class="card-title">今日进度</div>
+        <div class="progress-row">
+          <div class="ring">
+            <div class="ring-inner">
+              <div class="ring-value">1050</div>
+              <div class="ring-target">/ 1500 ml</div>
+            </div>
+          </div>
+          <div class="progress-info">
+            <div class="remain">还差 450ml</div>
+            <div class="encourage">再喝 2 杯就达标 💪</div>
+            <div class="stat-row">
+              <div class="stat-item">
+                <div class="stat-label">连续天数</div>
+                <div class="stat-value">🔥 7</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">本月达标</div>
+                <div class="stat-value">18 天</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">快速记录</div>
+        <div class="quick-grid">
+          <div class="quick-item"><div class="quick-value">100</div><div class="quick-unit">ml</div></div>
+          <div class="quick-item"><div class="quick-value">200</div><div class="quick-unit">ml</div></div>
+          <div class="quick-item highlight"><div class="quick-value">500</div><div class="quick-unit">ml</div></div>
+        </div>
+        <div class="card-title" style="margin-top: 24px;">常用杯型</div>
+        <div class="cup-grid">
+          <div class="cup-card"><div class="cup-icon">🥛</div><div class="cup-name">马克杯</div><div class="cup-cap">250ml</div></div>
+          <div class="cup-card"><div class="cup-icon">🧴</div><div class="cup-name">保温杯</div><div class="cup-cap">500ml</div></div>
+          <div class="cup-card"><div class="cup-icon">🍶</div><div class="cup-name">瓶装水</div><div class="cup-cap">550ml</div></div>
+          <div class="cup-card"><div class="cup-icon">🫙</div><div class="cup-name">大瓶装</div><div class="cup-cap">1500ml</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="records">
+      <div class="card-title">今日记录 (5 条)</div>
+      <div class="record-row">
+        <div class="record-dot"></div>
+        <div class="record-name">保温杯</div>
+        <div class="record-time">10:23</div>
+        <div class="record-amount">500ml</div>
+      </div>
+      <div class="record-row">
+        <div class="record-dot"></div>
+        <div class="record-name">马克杯</div>
+        <div class="record-time">09:15</div>
+        <div class="record-amount">250ml</div>
+      </div>
+      <div class="record-row">
+        <div class="record-dot"></div>
+        <div class="record-name">快速记录</div>
+        <div class="record-time">08:30</div>
+        <div class="record-amount">200ml</div>
+      </div>
+      <div class="record-row">
+        <div class="record-dot"></div>
+        <div class="record-name">瓶装水</div>
+        <div class="record-time">07:45</div>
+        <div class="record-amount">100ml</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

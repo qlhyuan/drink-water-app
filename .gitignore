@@ -1,0 +1,9 @@
+node_modules/
+dist/
+data/
+.env
+*.log
+.DS_Store
+prototype-v2.tar.gz
+prototype.tar.gz
+prototype-html.tar.gz

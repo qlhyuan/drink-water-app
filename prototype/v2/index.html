@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日喝水 · 原型 v2（精简版）</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --primary: #10b981;
+    --primary-light: #d1fae5;
+    --primary-dark: #047857;
+    --bg: #f8fafc;
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --border: #e5e7eb;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f3f4f6;
+    color: var(--text);
+    line-height: 1.5;
+    padding: 40px 20px;
+  }
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  .header { text-align: center; margin-bottom: 48px; }
+  .header h1 {
+    font-size: 36px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+  .header .subtitle { color: var(--text-light); font-size: 15px; margin-bottom: 16px; }
+  .badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .badge { padding: 4px 12px; background: #d1fae5; color: #047857; border-radius: 20px; font-size: 12px; font-weight: 500; }
+  .badge.new { background: #fef3c7; color: #d97706; }
+
+  .section { margin-bottom: 56px; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--border); }
+  .section-icon { width: 40px; height: 40px; background: #10b981; color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .section-header h2 { font-size: 22px; }
+  .section-header .meta { color: #9ca3af; font-size: 13px; margin-left: auto; }
+
+  .screens { display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; }
+
+  .mobile-frame {
+    width: 375px;
+    height: 760px;
+    background: white;
+    border-radius: 32px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+    overflow: hidden;
+    border: 8px solid #1f2937;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .status-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 28px;
+    background: #1f2937;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 24px 24px 0 0;
+    pointer-events: none;
+  }
+  .mobile-content {
+    position: absolute;
+    top: 28px; left: 0; right: 0; bottom: 0;
+    overflow-y: auto;
+    background: var(--bg);
+  }
+
+  .desktop-frame {
+    width: 1100px;
+    height: 600px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .screen-label {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--text-light);
+    font-weight: 500;
+  }
+  .screen-label .new-tag {
+    background: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 4px; font-size: 10px; margin-left: 6px;
+  }
+
+  /* 通用组件 */
+  .card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .btn-primary { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; }
+
+  /* === 移动端：引导页 === */
+  .ob-body { padding: 32px 24px; }
+  .ob-header { text-align: center; padding: 40px 0 32px; }
+  .ob-emoji { font-size: 72px; margin-bottom: 12px; }
+  .ob-h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .ob-sub { color: var(--text-light); font-size: 14px; }
+  .ob-steps { display: flex; gap: 6px; justify-content: center; margin-bottom: 32px; }
+  .ob-steps div { width: 32px; height: 4px; background: #e5e7eb; border-radius: 2px; }
+  .ob-steps .on { background: #10b981; width: 48px; }
+  .weight-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .weight-row span:first-child { font-weight: 600; }
+  .weight-row span:last-child { color: #10b981; font-weight: 700; }
+  .slider { position: relative; height: 6px; background: #e5e7eb; border-radius: 3px; margin-bottom: 4px; }
+  .slider-fill { position: absolute; left: 0; top: 0; height: 100%; background: #10b981; border-radius: 3px; width: 65%; }
+  .slider-thumb { position: absolute; top: -6px; left: 65%; transform: translateX(-50%); width: 18px; height: 18px; background: white; border: 3px solid #10b981; border-radius: 50%; }
+  .slider-range { display: flex; justify-content: space-between; font-size: 11px; color: #9ca3af; margin-top: 6px; }
+  .activity-title { font-weight: 600; margin-bottom: 12px; }
+  .activity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .act-item { border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px; text-align: center; }
+  .act-item.sel { border-color: #10b981; background: #ecfdf5; }
+  .act-item .icon { font-size: 22px; }
+  .act-item .label { font-size: 12px; margin-top: 4px; }
+  .act-item.sel .label { color: #047857; font-weight: 600; }
+  .result { background: linear-gradient(135deg, #10b981, #059669); border-radius: 16px; padding: 20px; color: white; text-align: center; }
+  .result-label { font-size: 12px; opacity: 0.9; margin-bottom: 6px; }
+  .result-value { font-size: 40px; font-weight: 800; }
+  .result-value span { font-size: 18px; }
+  .result-formula { font-size: 12px; opacity: 0.9; margin-top: 6px; }
+  .ob-card + .ob-card { margin-top: 16px; }
+  .next-btn { margin-top: 24px; }
+  .skip-btn { width: 100%; background: transparent; color: var(--text-light); border: none; padding: 12px; font-size: 14px; margin-top: 8px; cursor: pointer; }
+
+  /* === 移动端：记录弹窗 === */
+  .rec-body { position: relative; height: 100%; background: #1f2937; }
+  .rec-bg { padding: 20px; filter: brightness(0.5); }
+  .rec-bg-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: white; }
+  .rec-bg-card { background: linear-gradient(135deg, #10b981, #059669); color: white; border-radius: 16px; padding: 40px 20px; text-align: center; }
+  .rec-bg-card .num { font-size: 36px; font-weight: 800; }
+  .modal { position: absolute; left: 16px; right: 16px; bottom: 16px; background: white; border-radius: 20px; padding: 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.2); }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .modal-title { font-size: 17px; font-weight: 700; }
+  .modal-close { width: 28px; height: 28px; background: #f3f4f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 14px; }
+  .big-num { text-align: center; padding: 16px 0; }
+  .big-num-label { font-size: 14px; color: var(--text-light); }
+  .big-num-val { font-size: 56px; font-weight: 800; color: #10b981; line-height: 1; margin-top: 4px; }
+  .big-num-val span { font-size: 24px; color: #9ca3af; }
+  .preset-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .preset { border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; text-align: center; }
+  .preset.sel { border: 2px solid #10b981; background: #ecfdf5; }
+  .preset.sel .pn { color: #047857; }
+  .preset.sel .pl { color: #047857; font-weight: 600; }
+  .pn { font-size: 13px; font-weight: 600; }
+  .pl { font-size: 10px; color: #9ca3af; }
+  .stepper { display: flex; align-items: center; justify-content: space-between; background: var(--bg); border-radius: 12px; padding: 8px; margin-bottom: 16px; }
+  .stepper button { width: 40px; height: 40px; background: white; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 18px; cursor: pointer; }
+  .stepper .label { font-size: 13px; color: var(--text-light); }
+  .time-row { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: var(--bg); border-radius: 10px; margin-bottom: 16px; }
+  .time-row .tl { font-size: 13px; color: var(--text-light); }
+  .time-row .tv { font-size: 13px; font-weight: 500; }
+
+  /* === 移动端：提醒设置 === */
+  .rm-body { padding: 20px; }
+  .rm-top { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .rm-back { width: 32px; height: 32px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .rm-top h1 { font-size: 18px; font-weight: 700; }
+  .rm-card { margin-bottom: 12px; }
+  .rm-card + .rm-card { margin-top: 12px; }
+  .rm-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+  .rm-title { font-weight: 600; font-size: 14px; }
+  .rm-desc { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+  .sw-on { width: 44px; height: 24px; background: #10b981; border-radius: 12px; position: relative; }
+  .sw-on::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; right: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .sw-off { width: 44px; height: 24px; background: #e5e7eb; border-radius: 12px; position: relative; }
+  .sw-off::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .ss-on { width: 36px; height: 20px; background: #10b981; border-radius: 10px; position: relative; }
+  .ss-on::after { content: ''; width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; right: 2px; }
+  .ss-off { width: 36px; height: 20px; background: #e5e7eb; border-radius: 10px; position: relative; }
+  .ss-off::after { content: ''; width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; }
+  .int-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .int-item { border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; text-align: center; font-size: 13px; }
+  .int-item.sel { border: 2px solid #10b981; background: #ecfdf5; color: #047857; font-weight: 600; }
+  .rm-divider { padding: 10px 0; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; }
+  .rm-divider:last-child { border-bottom: none; }
+  .rm-divider .l { font-size: 13px; }
+  .rm-divider .r { font-size: 13px; font-weight: 600; }
+  .notif-preview { background: #1f2937; border-radius: 16px; padding: 12px; color: white; margin-top: 16px; }
+  .np-label { font-size: 10px; color: #9ca3af; margin-bottom: 8px; }
+  .np-card { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; display: flex; gap: 10px; align-items: center; }
+  .np-icon { width: 36px; height: 36px; background: #10b981; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .np-title { font-size: 12px; font-weight: 600; }
+  .np-body { font-size: 11px; color: #d1d5db; }
+  .np-time { font-size: 10px; color: #9ca3af; }
+
+  /* === 移动端：历史空状态 === */
+  .he-body { padding: 20px; }
+  .he-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .he-top h1 { font-size: 22px; font-weight: 700; }
+  .week-tag { padding: 6px 12px; background: #ecfdf5; color: #047857; border-radius: 16px; font-size: 12px; font-weight: 600; }
+  .he-empty { text-align: center; padding: 60px 24px; }
+  .he-circle { width: 140px; height: 140px; margin: 0 auto; background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 72px; }
+  .he-title { font-size: 18px; font-weight: 600; margin-top: 24px; }
+  .he-desc { font-size: 13px; color: var(--text-light); margin-top: 8px; line-height: 1.6; }
+  .he-cta { margin: 24px 0; }
+  .he-tip { background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: 12px; padding: 16px; }
+  .he-tip-inner { display: flex; gap: 12px; }
+  .he-tip-icon { font-size: 24px; }
+  .he-tip-title { font-size: 13px; font-weight: 600; color: #92400e; margin-bottom: 4px; }
+  .he-tip-body { font-size: 12px; color: #78350f; line-height: 1.6; }
+
+  /* === 桌面端：引导页 === */
+  .dt-body { display: flex; height: 100%; }
+  .dt-left { flex: 1; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; padding: 40px; }
+  .dt-left-inner { text-align: center; color: white; }
+  .dt-emoji { font-size: 120px; }
+  .dt-h { font-size: 28px; font-weight: 700; margin-top: 16px; }
+  .dt-p { font-size: 14px; opacity: 0.9; margin-top: 12px; line-height: 1.8; }
+  .dt-right { flex: 1; padding: 60px 80px; display: flex; flex-direction: column; justify-content: center; }
+  .dt-steps { display: flex; gap: 6px; margin-bottom: 32px; }
+  .dt-steps div { width: 40px; height: 4px; background: #10b981; border-radius: 2px; }
+  .dt-steps .off { background: #e5e7eb; }
+  .dt-step-label { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .dt-step-desc { font-size: 14px; color: var(--text-light); margin-bottom: 32px; }
+  .dt-field { margin-bottom: 24px; }
+  .dt-field-label { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .dt-input { width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; }
+  .dt-act-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .dt-act-item { border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px; text-align: center; }
+  .dt-act-item.sel { border-color: #10b981; background: #ecfdf5; }
+  .dt-act-icon { font-size: 24px; }
+  .dt-act-label { font-size: 13px; margin-top: 4px; }
+  .dt-act-item.sel .dt-act-label { color: #047857; font-weight: 600; }
+  .dt-rec { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-radius: 12px; padding: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+  .dt-rec-label { font-size: 12px; color: #065f46; }
+  .dt-rec-val { font-size: 28px; font-weight: 800; color: #047857; }
+  .dt-rec-emoji { font-size: 40px; }
+  .dt-btns { display: flex; gap: 12px; }
+  .dt-btn-back { flex: 1; padding: 14px; background: white; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px; cursor: pointer; }
+  .dt-btn-next { flex: 2; padding: 14px; background: #10b981; color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+  .note {
+    margin-top: 32px;
+    padding: 16px 20px;
+    background: #f0fdf4;
+    border-left: 4px solid #10b981;
+    border-radius: 8px;
+    color: #166534;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  .note b { color: #047857; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>💧 每日喝水 · 原型 v2</h1>
+    <p class="subtitle">精简版：在 v1 基础上补全 4 个缺失页面（引导页 · 记录弹窗 · 提醒设置 · 空状态）</p>
+    <div class="badges">
+      <span class="badge">Vue 3 + Vite</span>
+      <span class="badge">Node 20 + Express</span>
+      <span class="badge">SQLite · Prisma</span>
+      <span class="badge">Docker 一键部署</span>
+      <span class="badge new">v2 新增 4 页</span>
+    </div>
+  </div>
+
+  <!-- ========== 移动端 ========== -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">📱</div>
+      <h2>移动端</h2>
+      <span class="meta">iPhone 14 · 375 × 812</span>
+    </div>
+    <div class="screens">
+
+      <!-- 引导页 -->
+      <div>
+        <div class="mobile-frame">
+          <div class="status-bar"><span>9:41</span><span>●●●●●</span></div>
+          <div class="mobile-content">
+            <div class="ob-body">
+              <div class="ob-header">
+                <div class="ob-emoji">💧</div>
+                <div class="ob-h1">欢迎使用每日喝水</div>
+                <div class="ob-sub">3 步定制你的每日饮水目标</div>
+              </div>
+              <div class="ob-steps"><div class="on"></div><div></div><div></div></div>
+
+              <div class="card ob-card">
+                <div class="weight-row"><span>你的体重</span><span>65 kg</span></div>
+                <div class="slider"><div class="slider-fill"></div><div class="slider-thumb"></div></div>
+                <div class="slider-range"><span>30kg</span><span>150kg</span></div>
+              </div>
+
+              <div class="card ob-card">
+                <div class="activity-title">活动水平</div>
+                <div class="activity-grid">
+                  <div class="act-item"><div class="icon">🛋️</div><div class="label">久坐</div></div>
+                  <div class="act-item sel"><div class="icon">🚶</div><div class="label">轻度</div></div>
+                  <div class="act-item"><div class="icon">🏃</div><div class="label">中度</div></div>
+                  <div class="act-item"><div class="icon">💪</div><div class="label">高度</div></div>
+                </div>
+              </div>
+
+              <div class="result ob-card">
+                <div class="result-label">推荐每日目标</div>
+                <div class="result-value">2050<span> ml</span></div>
+                <div class="result-formula">≈ 体重 × 35 + 活动量补偿</div>
+              </div>
+
+              <button class="btn-primary next-btn">下一步 →</button>
+              <button class="skip-btn">跳过</button>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">首次引导 <span class="new-tag">NEW</span></div>
+      </div>
+
+      <!-- 记录弹窗 -->
+      <div>
+        <div class="mobile-frame">
+          <div class="status-bar"><span>9:41</span><span>●●●●●</span></div>
+          <div class="mobile-content" style="background: #1f2937;">
+            <div class="rec-body">
+              <div class="rec-bg">
+                <div class="rec-bg-title">今日饮水</div>
+                <div class="rec-bg-card"><div class="num">1050</div><div style="font-size:11px;opacity:0.9;">/ 2050 ml</div></div>
+              </div>
+              <div class="modal">
+                <div class="modal-header">
+                  <div class="modal-title">记录喝水 💧</div>
+                  <div class="modal-close">✕</div>
+                </div>
+                <div class="big-num">
+                  <div class="big-num-label">选择容量</div>
+                  <div class="big-num-val">250<span>ml</span></div>
+                </div>
+                <div class="preset-grid">
+                  <div class="preset"><div class="pn">100</div><div class="pl">小杯</div></div>
+                  <div class="preset"><div class="pn">200</div><div class="pl">中杯</div></div>
+                  <div class="preset sel"><div class="pn">250</div><div class="pl">马克杯</div></div>
+                  <div class="preset"><div class="pn">500</div><div class="pl">大杯</div></div>
+                </div>
+                <div class="stepper">
+                  <button>−</button>
+                  <div class="label">自定义</div>
+                  <button>+</button>
+                </div>
+                <div class="time-row">
+                  <span class="tl">⏰ 时间</span>
+                  <span class="tv">现在 · 10:42</span>
+                </div>
+                <button class="btn-primary">确认记录 +250 ml</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">记录弹窗 <span class="new-tag">NEW</span></div>
+      </div>
+
+      <!-- 提醒设置 -->
+      <div>
+        <div class="mobile-frame">
+          <div class="status-bar"><span>9:41</span><span>●●●●●</span></div>
+          <div class="mobile-content">
+            <div class="rm-body">
+              <div class="rm-top">
+                <div class="rm-back">‹</div>
+                <h1>提醒设置</h1>
+              </div>
+
+              <div class="card rm-card">
+                <div class="rm-row">
+                  <div>
+                    <div class="rm-title">开启提醒</div>
+                    <div class="rm-desc">允许应用发送通知</div>
+                  </div>
+                  <div class="sw-on"></div>
+                </div>
+              </div>
+
+              <div class="card rm-card">
+                <div class="rm-row" style="margin-bottom: 12px;">
+                  <span style="font-size: 14px; font-weight: 600;">提醒间隔</span>
+                  <span style="font-size: 13px; color: #10b981; font-weight: 600;">每 60 分钟</span>
+                </div>
+                <div class="int-grid">
+                  <div class="int-item">30分</div>
+                  <div class="int-item sel">60分</div>
+                  <div class="int-item">90分</div>
+                  <div class="int-item">120分</div>
+                </div>
+              </div>
+
+              <div class="card rm-card">
+                <div style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">提醒时间段</div>
+                <div class="rm-divider"><span class="l">开始时间</span><span class="r">09:00</span></div>
+                <div class="rm-divider"><span class="l">结束时间</span><span class="r">22:00</span></div>
+                <div class="rm-divider">
+                  <span class="l">睡眠免打扰</span>
+                  <div class="ss-on"></div>
+                </div>
+              </div>
+
+              <div class="card rm-card">
+                <div style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">智能选项</div>
+                <div class="rm-row" style="padding: 8px 0;">
+                  <div>
+                    <div style="font-size: 13px;">✨ 智能提醒</div>
+                    <div style="font-size: 11px; color: var(--text-light); margin-top: 2px;">根据喝水历史智能调整</div>
+                  </div>
+                  <div class="ss-on"></div>
+                </div>
+                <div class="rm-row" style="padding: 8px 0;">
+                  <div>
+                    <div style="font-size: 13px;">📳 震动反馈</div>
+                    <div style="font-size: 11px; color: var(--text-light); margin-top: 2px;">提醒时震动一下</div>
+                  </div>
+                  <div class="ss-off"></div>
+                </div>
+              </div>
+
+              <div class="notif-preview">
+                <div class="np-label">通知预览</div>
+                <div class="np-card">
+                  <div class="np-icon">💧</div>
+                  <div style="flex: 1;">
+                    <div class="np-title">每日喝水</div>
+                    <div class="np-body">该喝水啦～保持身体水润 ✨</div>
+                  </div>
+                  <div class="np-time">现在</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">提醒设置 <span class="new-tag">NEW</span></div>
+      </div>
+
+      <!-- 历史·空状态 -->
+      <div>
+        <div class="mobile-frame">
+          <div class="status-bar"><span>9:41</span><span>●●●●●</span></div>
+          <div class="mobile-content">
+            <div class="he-body">
+              <div class="he-top">
+                <h1>历史统计</h1>
+                <div class="week-tag">本周 ▾</div>
+              </div>
+              <div class="he-empty">
+                <div class="he-circle">💧</div>
+                <div class="he-title">还没有记录哦</div>
+                <div class="he-desc">点击首页的「快速记录」按钮<br>开始你的第一杯水</div>
+              </div>
+              <button class="btn-primary he-cta">去记录第一杯 →</button>
+              <div class="he-tip">
+                <div class="he-tip-inner">
+                  <div class="he-tip-icon">💡</div>
+                  <div>
+                    <div class="he-tip-title">小贴士</div>
+                    <div class="he-tip-body">建议每天 8 杯水（≈ 2000ml），分时段少量多次饮用更健康</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">历史·空状态 <span class="new-tag">NEW</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========== 桌面端 ========== -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">🖥️</div>
+      <h2>桌面端</h2>
+      <span class="meta">Web · 1100 × 600</span>
+    </div>
+    <div class="screens" style="flex-direction: column;">
+
+      <div>
+        <div class="desktop-frame">
+          <div class="dt-body">
+            <div class="dt-left">
+              <div class="dt-left-inner">
+                <div class="dt-emoji">💧</div>
+                <div class="dt-h">科学饮水，健康生活</div>
+                <div class="dt-p">基于你的身体数据<br>定制专属饮水计划</div>
+              </div>
+            </div>
+            <div class="dt-right">
+              <div class="dt-steps"><div></div><div></div><div class="off"></div></div>
+              <div class="dt-step-label">第 2 步 / 共 3 步</div>
+              <div class="dt-step-desc">告诉我们你的基本情况</div>
+
+              <div class="dt-field">
+                <div class="dt-field-label">体重 (kg)</div>
+                <input class="dt-input" type="text" value="65">
+              </div>
+
+              <div class="dt-field">
+                <div class="dt-field-label">活动水平</div>
+                <div class="dt-act-grid">
+                  <div class="dt-act-item"><div class="dt-act-icon">🛋️</div><div class="dt-act-label">久坐</div></div>
+                  <div class="dt-act-item sel"><div class="dt-act-icon">🚶</div><div class="dt-act-label">轻度</div></div>
+                  <div class="dt-act-item"><div class="dt-act-icon">🏃</div><div class="dt-act-label">中度</div></div>
+                  <div class="dt-act-item"><div class="dt-act-icon">💪</div><div class="dt-act-label">高度</div></div>
+                </div>
+              </div>
+
+              <div class="dt-rec">
+                <div>
+                  <div class="dt-rec-label">推荐每日目标</div>
+                  <div class="dt-rec-val">2050 ml</div>
+                </div>
+                <div class="dt-rec-emoji">🎯</div>
+              </div>
+
+              <div class="dt-btns">
+                <button class="dt-btn-back">上一步</button>
+                <button class="dt-btn-next">下一步 →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">桌面端 · 引导页 <span class="new-tag">NEW</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="note">
+    <b>📝 关于 v2：</b>本版本只补 4 个新页面/状态。<br>
+    <b>v1 已有的页面</b>（移动端 5 页：首页/历史/目标/成就/个人中心；桌面端 3 页：登录/首页/历史）保留在 <code>../index.html</code>。<br>
+    <b>下一步：</b>如果需要主题切换（海洋蓝/暖橙/玻璃拟态等 6 套），或补"桌面·首页空状态"等，告诉我即可继续。
+  </div>
+
+</div>
+</body>
+</html><div class="dt-act-label">轻度</div></div>
+                  <div class="dt-act-item"><div class="dt-act-icon">🏃</div>

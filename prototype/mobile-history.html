@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="common.css">
+<style>
+  .page { padding: 0 16px 80px; background: var(--bg); min-height: 100%; }
+  .topbar { display: flex; align-items: center; padding: 14px 0; }
+  .back { font-size: 18px; margin-right: 12px; }
+  .topbar-title { font-size: 16px; font-weight: 600; }
+  .summary { background: white; border-radius: 16px; padding: 20px; display: flex; justify-content: space-around; box-shadow: var(--shadow); margin-bottom: 16px; }
+  .summary-item { text-align: center; }
+  .summary-value { font-size: 18px; font-weight: 700; color: var(--brand); }
+  .summary-label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+  .tabs { display: flex; background: white; border-radius: 12px; padding: 4px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .tab { flex: 1; text-align: center; padding: 8px 0; font-size: 13px; color: var(--text-secondary); border-radius: 8px; }
+  .tab.active { background: var(--brand); color: white; font-weight: 600; }
+  .card { background: white; border-radius: 16px; padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px; }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+  .chart { display: flex; justify-content: space-between; align-items: flex-end; height: 160px; padding: 0 4px; }
+  .bar { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; margin: 0 2px; }
+  .bar-value { font-size: 10px; color: var(--text-secondary); margin-bottom: 4px; height: 16px; }
+  .bar-value.success { color: var(--brand); font-weight: 700; }
+  .bar-track { width: 14px; flex: 1; background: #f3f4f6; border-radius: 4px; display: flex; align-items: flex-end; }
+  .bar-fill { width: 100%; background: linear-gradient(0deg, var(--brand), #34d399); border-radius: 4px; }
+  .bar-label { font-size: 10px; color: var(--text-tertiary); margin-top: 4px; }
+  .heatmap { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .heatmap-cell { aspect-ratio: 1; background: #f3f4f6; border-radius: 3px; }
+  .heatmap-cell.l1 { background: #d1fae5; }
+  .heatmap-cell.l2 { background: #6ee7b7; }
+  .heatmap-cell.l3 { background: var(--brand); }
+  .heatmap-cell.today { border: 1.5px solid var(--brand-dark); }
+  .legend { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 16px; font-size: 11px; color: var(--text-secondary); }
+  .legend-cell { width: 12px; height: 12px; border-radius: 2px; background: #f3f4f6; }
+  .legend-cell.l1 { background: #d1fae5; }
+  .legend-cell.l2 { background: #6ee7b7; }
+  .legend-cell.l3 { background: var(--brand); }
+  .tabbar { position: absolute; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px 0 18px; box-shadow: 0 -2px 8px rgba(0,0,0,0.06); border-top: 1px solid #f3f4f6; }
+  .tab { text-align: center; font-size: 11px; color: var(--text-tertiary); }
+  .tab.active { color: var(--brand); }
+  .tab-icon { font-size: 20px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topbar">
+    <div class="back">‹</div>
+    <div class="topbar-title">历史统计</div>
+  </div>
+
+  <div class="summary">
+    <div class="summary-item">
+      <div class="summary-value">85%</div>
+      <div class="summary-label">完成率</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-value">🔥 7</div>
+      <div class="summary-label">连续天数</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-value">1320</div>
+      <div class="summary-label">日均 ml</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active">近 7 天</div>
+    <div class="tab">近 30 天</div>
+    <div class="tab">周报</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">每日饮水量</div>
+    <div class="chart">
+      <div class="bar"><div class="bar-value">900</div><div class="bar-track"><div class="bar-fill" style="height:60%"></div></div><div class="bar-label">一</div></div>
+      <div class="bar"><div class="bar-value">1500</div><div class="bar-track"><div class="bar-fill" style="height:100%"></div></div><div class="bar-label">二</div></div>
+      <div class="bar"><div class="bar-value">1200</div><div class="bar-track"><div class="bar-fill" style="height:80%"></div></div><div class="bar-label">三</div></div>
+      <div class="bar"><div class="bar-value success">1500</div><div class="bar-track"><div class="bar-fill" style="height:100%"></div></div><div class="bar-label">四</div></div>
+      <div class="bar"><div class="bar-value">1100</div><div class="bar-track"><div class="bar-fill" style="height:73%"></div></div><div class="bar-label">五</div></div>
+      <div class="bar"><div class="bar-value">1700</div><div class="bar-track"><div class="bar-fill" style="height:100%"></div></div><div class="bar-label">六</div></div>
+      <div class="bar"><div class="bar-value success">1050</div><div class="bar-track"><div class="bar-fill" style="height:70%; background: linear-gradient(0deg, var(--brand), #34d399); opacity:0.6;"></div></div><div class="bar-label">日</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">打卡热力图（近 28 天）</div>
+    <div class="heatmap">
+      <!-- 4周 x 7天 -->
+      <div class="heatmap-cell l1"></div>
+      <div class="heatmap-cell l2"></div>
+      <div class="heatmap-cell l3"></div>
+      <div class="heatmap-cell l2"></div>
+      <div class="heatmap-cell l3"></div>
+      <div class="heatmap-cell l3"></div>
+      <div class="heatmap-cell l1"></div>
+
+      <div class="heatmap-cell l2"></div>
+      <div class="heatmap-cell l3"></div>
+      <div class="heatmap-cell l3"></div>
+      <div class="heatmap-cell l1"></div>
+      <div class="heatmap-cell l2"></div>
+      <div class="heatmap-cell l3"></div>
+      <div class="heatmap-cell l₂"></div>
+
+      <div class="heatmap-cell l3"></div>
+      <div class="heatmap-cell l1"></div>
+      <div class="heatmap-cell l2"></div>
+      <div class="heatmap-cell l3"></div>
+      <div class="heatmap-cell l3"></div>
+      <div class="heatmap-cell l2"></div>
+      <div class="heatmap-cell l3"></div>
+
+      <div class="heatmap-cell l2"></div>
+      <div class="heatmap-cell l3"></div>
+      <div class="heatmap-cell l3"></div>
+      <div class="heatmap-cell l3"></div>
+      <div class="heatmap-cell l1"></div>
+      <div class="heatmap-cell l2"></div>
+      <div class="heatmap-cell l3 today"></div>
+    </div>
+    <div class="legend">
+      少
+      <div class="legend-cell"></div>
+      <div class="legend-cell l1"></div>
+      <div class="legend-cell l2"></div>
+      <div class="legend-cell l3"></div>
+      多
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab"><div class="tab-icon">💧</div>首页</div>
+    <div class="tab active"><div class="tab-icon">📊</div>历史</div>
+    <div class="tab"><div class="tab-icon">🏆</div>成就</div>
+    <div class="tab"><div class="tab-icon">👤</div>我的</div>
+  </div>
+</div>
+</body>
+</html>

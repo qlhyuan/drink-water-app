@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="common.css">
+<style>
+  .page { padding: 0 16px 32px; background: var(--bg); min-height: 100%; }
+  .nav { display: flex; align-items: center; padding: 14px 0; }
+  .nav-back { width: 32px; height: 32px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); font-size: 14px; }
+  .nav-title { flex: 1; text-align: center; font-size: 16px; font-weight: 700; }
+  .nav-save { font-size: 14px; color: var(--brand); font-weight: 600; }
+  .section { background: white; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--shadow); }
+  .section-label { font-size: 11px; color: var(--text-tertiary); margin-bottom: 10px; letter-spacing: 0.5px; }
+  .row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f3f4f6; }
+  .row:last-child { border-bottom: none; }
+  .row-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+  .row-icon { font-size: 18px; }
+  .row-text { min-width: 0; }
+  .row-title { font-size: 14px; font-weight: 500; }
+  .row-desc { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .row-value { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+  .row-value.next { color: var(--brand); font-weight: 600; }
+  /* 开关 */
+  .switch { width: 44px; height: 26px; background: #e5e7eb; border-radius: 13px; position: relative; transition: 0.2s; }
+  .switch.on { background: var(--brand); }
+  .switch::after { content: ''; width: 22px; height: 22px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+  .switch.on::after { left: 20px; }
+  /* 时间段 */
+  .time-range { display: flex; gap: 8px; }
+  .time-box { flex: 1; background: var(--bg); border: 2px solid transparent; border-radius: 12px; padding: 12px; text-align: center; }
+  .time-box.focused { border-color: var(--brand); background: var(--brand-light); }
+  .time-label { font-size: 11px; color: var(--text-secondary); }
+  .time-value { font-size: 22px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  /* 提醒时间点列表 */
+  .time-list { display: flex; gap: 8px; flex-wrap: wrap; }
+  .time-pill { padding: 8px 14px; background: var(--brand-light); color: var(--brand-dark); border-radius: 20px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .time-pill.add { background: white; border: 2px dashed #d1d5db; color: var(--text-secondary); }
+  /* 智能提醒卡片 */
+  .smart-card { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-radius: 14px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; border: 1px solid var(--brand-light); }
+  .smart-icon { font-size: 28px; }
+  .smart-title { font-size: 14px; font-weight: 700; }
+  .smart-desc { font-size: 12px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="nav">
+    <div class="nav-back">‹</div>
+    <div class="nav-title">提醒设置</div>
+    <div class="nav-save">保存</div>
+  </div>
+
+  <div class="smart-card">
+    <div class="smart-icon">🤖</div>
+    <div>
+      <div class="smart-title">智能提醒已开启</div>
+      <div class="smart-desc">根据你的作息和饮水习惯，自动调整提醒时间，避开睡眠时段</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">基础设置</div>
+    <div class="row">
+      <div class="row-left"><span class="row-icon">🔔</span><div class="row-text"><div class="row-title">喝水提醒</div></div></div>
+      <div class="switch on"></div>
+    </div>
+    <div class="row">
+      <div class="row-left"><span class="row-icon">⏰</span><div class="row-text"><div class="row-title">提醒间隔</div><div class="row-desc">每隔多久提醒一次</div></div></div>
+      <div class="row-value next">每 60 分钟 ›</div>
+    </div>
+    <div class="row">
+      <div class="row-left"><span class="row-icon">📳</span><div class="row-text"><div class="row-title">震动</div></div></div>
+      <div class="switch on"></div>
+    </div>
+    <div class="row">
+      <div class="row-left"><span class="row-icon">🔕</span><div class="row-text"><div class="row-title">免打扰模式</div><div class="row-desc">夜间自动静音</div></div></div>
+      <div class="switch on"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">提醒时段</div>
+    <div class="time-range">
+      <div class="time-box focused">
+        <div class="time-label">开始</div>
+        <div class="time-value">08:00</div>
+      </div>
+      <div class="time-box focused">
+        <div class="time-label">结束</div>
+        <div class="time-value">22:00</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">提醒时间点（已设 4 个）</div>
+    <div class="time-list">
+      <div class="time-pill">08:30 ✕</div>
+      <div class="time-pill">11:00 ✕</div>
+      <div class="time-pill">14:30 ✕</div>
+      <div class="time-pill">17:00 ✕</div>
+      <div class="time-pill add">+ 添加</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">提醒方式</div>
+    <div class="row">
+      <div class="row-left"><span class="row-icon">💬</span><div class="row-text"><div class="row-title">应用内通知</div></div></div>
+      <div class="switch on"></div>
+    </div>
+    <div class="row">
+      <div class="row-left"><span class="row-icon">📢</span><div class="row-text"><div class="row-title">浏览器通知</div><div class="row-desc">需授予权限</div></div></div>
+      <div class="switch"></div>
+    </div>
+    <div class="row">
+      <div class="row-left"><span class="row-icon">🎵</span><div class="row-text"><div class="row-title">提示音</div><div class="row-desc">水滴声</div></div></div>
+      <div class="switch on"></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

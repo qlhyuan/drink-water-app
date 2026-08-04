@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="common.css">
+<style>
+  .page { padding: 0 16px 80px; background: var(--bg); min-height: 100%; }
+  .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0 12px; }
+  .title { font-size: 20px; font-weight: 700; }
+  .date-bar { background: white; border-radius: 12px; padding: 12px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .date-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
+  .date-nav { display: flex; align-items: center; justify-content: space-between; }
+  .date-current { font-size: 15px; font-weight: 600; }
+  .date-arrow { width: 28px; height: 28px; background: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-secondary); }
+  /* 空状态 */
+  .empty { text-align: center; padding: 48px 24px; }
+  .empty-illustration { width: 140px; height: 140px; margin: 0 auto 20px; background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 64px; box-shadow: inset 0 -8px 24px rgba(16,185,129,0.15); position: relative; }
+  .empty-illustration::after { content: ''; position: absolute; inset: -10px; border-radius: 50%; border: 2px dashed var(--brand-light); opacity: 0.5; }
+  .empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .empty-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
+  .empty-btn { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, var(--brand), var(--brand-dark)); color: white; padding: 12px 24px; border-radius: 24px; font-size: 14px; font-weight: 600; box-shadow: var(--shadow-brand); border: 0; }
+  .tip-card { background: white; border-radius: 12px; padding: 14px 16px; margin-top: 20px; box-shadow: var(--shadow); }
+  .tip-title { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .tip-list { display: flex; gap: 10px; }
+  .tip { flex: 1; background: var(--bg); border-radius: 8px; padding: 10px 6px; text-align: center; }
+  .tip-emoji { font-size: 20px; }
+  .tip-text { font-size: 10px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
+  .tabbar { position: absolute; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px 0 18px; box-shadow: 0 -2px 8px rgba(0,0,0,0.06); border-top: 1px solid #f3f4f6; }
+  .tab { text-align: center; font-size: 11px; color: var(--text-tertiary); }
+  .tab.active { color: var(--brand); }
+  .tab-icon { font-size: 20px; }
+</style>
+</head>
+<body>
+<div class="page" style="position:relative;">
+  <div class="header">
+    <div class="title">历史记录</div>
+    <div style="width:36px;height:36px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);">📅</div>
+  </div>
+
+  <div class="date-bar">
+    <div class="date-label">日期</div>
+    <div class="date-nav">
+      <div class="date-arrow">‹</div>
+      <div class="date-current">2026-08-04</div>
+      <div class="date-arrow">›</div>
+    </div>
+  </div>
+
+  <div class="empty">
+    <div class="empty-illustration">💧</div>
+    <div class="empty-title">还没有喝水记录</div>
+    <div class="empty-desc">今天还没有记录任何饮水<br>点击下方按钮开启你的第一次记录吧</div>
+    <button class="empty-btn">💧 立即记录</button>
+  </div>
+
+  <div class="tip-card">
+    <div class="tip-title">💡 健康小贴士</div>
+    <div class="tip-list">
+      <div class="tip"><div class="tip-emoji">🌅</div><div class="tip-text">晨起<br>先喝一杯</div></div>
+      <div class="tip"><div class="tip-emoji">🍽️</div><div class="tip-text">饭前<br>半小时喝</div></div>
+      <div class="tip"><div class="tip-emoji">😴</div><div class="tip-text">睡前<br>少喝水</div></div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab"><div class="tab-icon">💧</div>首页</div>
+    <div class="tab active"><div class="tab-icon">📊</div>历史</div>
+    <div class="tab"><div class="tab-icon">🏆</div>成就</div>
+    <div class="tab"><div class="tab-icon">👤</div>我的</div>
+  </div>
+</div>
+</body>
+</html>

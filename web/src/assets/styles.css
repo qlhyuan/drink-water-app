@@ -1,0 +1,45 @@
+:root {
+  --brand: #10b981;
+  --brand-light: #d1fae5;
+  --brand-dark: #047857;
+  --brand-bg: #ecfdf5;
+  --text: #1f2937;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --bg: #f8fafc;
+  --bg-card: #ffffff;
+  --border: #e5e7eb;
+  --shadow: 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-brand: 0 8px 24px rgba(16,185,129,0.25);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+html, body, #app { height: 100%; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--brand); text-decoration: none; }
+button { font-family: inherit; }
+
+.page-pad { padding: 16px; }
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.muted { color: var(--text-secondary); }
+.center { text-align: center; }
+
+/* Vant 主题覆盖 */
+:root {
+  --van-primary-color: var(--brand);
+  --van-button-primary-background: var(--brand);
+  --van-button-primary-border-color: var(--brand);
+}

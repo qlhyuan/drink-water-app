@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="common.css">
+<style>
+  .page { padding: 0 16px 80px; background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 50%); min-height: 100%; }
+  .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0 12px; }
+  .greeting { font-size: 12px; color: var(--text-secondary); }
+  .title { font-size: 20px; font-weight: 700; margin-top: 2px; }
+  .icon-btn { width: 36px; height: 36px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); }
+  .progress-card { background: white; border-radius: 16px; padding: 24px 16px; display: flex; align-items: center; box-shadow: var(--shadow); margin: 12px 0 16px; position: relative; overflow: hidden; }
+  .progress-card::before { content: ''; position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; background: var(--brand-light); border-radius: 50%; opacity: 0.5; }
+  .ring { width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(var(--brand) 0deg 252deg, #e5e7eb 252deg 360deg); display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
+  .ring::before { content: ''; position: absolute; inset: 8px; background: white; border-radius: 50%; }
+  .ring-inner { position: relative; z-index: 2; text-align: center; }
+  .ring-value { font-size: 22px; font-weight: 700; line-height: 1; }
+  .ring-target { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+  .progress-info { flex: 1; margin-left: 16px; position: relative; z-index: 1; }
+  .remain { font-size: 12px; color: var(--text-secondary); }
+  .encourage { font-size: 16px; font-weight: 600; margin: 4px 0 8px; }
+  .streak { display: inline-block; background: #fef3c7; color: #92400e; font-size: 11px; padding: 4px 8px; border-radius: 999px; }
+  .section { margin-bottom: 20px; }
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .section-title { font-size: 14px; font-weight: 600; }
+  .section-action { font-size: 12px; color: var(--brand); }
+  .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .quick-item { background: white; border-radius: 12px; padding: 14px 8px; text-align: center; box-shadow: var(--shadow); border: 2px solid transparent; }
+  .quick-item.highlight { background: var(--brand); border-color: var(--brand); box-shadow: var(--shadow-brand); }
+  .quick-drops { font-size: 14px; margin-bottom: 4px; }
+  .quick-value { font-size: 18px; font-weight: 700; }
+  .quick-item.highlight .quick-value { color: white; }
+  .quick-unit { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+  .quick-item.highlight .quick-unit { color: var(--brand-light); }
+  .cup-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .cup-card { background: white; border-radius: 12px; padding: 12px 8px; text-align: center; box-shadow: var(--shadow); }
+  .cup-icon { font-size: 24px; }
+  .cup-name { font-size: 11px; font-weight: 600; margin-top: 4px; }
+  .cup-cap { font-size: 10px; color: var(--text-secondary); }
+  .photo-btn { width: 100%; background: linear-gradient(135deg, var(--brand), var(--brand-dark)); color: white; border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 600; box-shadow: var(--shadow-brand); border: 0; }
+  .records { background: white; border-radius: 12px; padding: 8px 16px; box-shadow: var(--shadow); }
+  .record-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+  .record-item:last-child { border-bottom: none; }
+  .record-dot { width: 6px; height: 6px; background: var(--brand); border-radius: 50%; margin-right: 8px; }
+  .record-name { flex: 1; font-size: 13px; }
+  .record-amount { font-size: 13px; font-weight: 600; margin-right: 8px; }
+  .record-time { font-size: 11px; color: var(--text-tertiary); }
+  .tabbar { position: absolute; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px 0 18px; box-shadow: 0 -2px 8px rgba(0,0,0,0.06); border-top: 1px solid #f3f4f6; }
+  .tab { text-align: center; font-size: 11px; color: var(--text-tertiary); }
+  .tab.active { color: var(--brand); }
+  .tab-icon { font-size: 20px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div>
+      <div class="greeting">早上好 👋</div>
+      <div class="title">今天喝水啦</div>
+    </div>
+    <div class="icon-btn">🔔</div>
+  </div>
+
+  <div class="progress-card">
+    <div class="ring">
+      <div class="ring-inner">
+        <div class="ring-value">1050</div>
+        <div class="ring-target">/ 1500</div>
+      </div>
+    </div>
+    <div class="progress-info">
+      <div class="remain">还差 450ml</div>
+      <div class="encourage">再喝几杯就达标 💪</div>
+      <div class="streak">🔥 连续 7 天</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">快速记录</div>
+    </div>
+    <div class="quick-grid">
+      <div class="quick-item">
+        <div class="quick-drops">💧</div>
+        <div class="quick-value">100</div>
+        <div class="quick-unit">ml</div>
+      </div>
+      <div class="quick-item">
+        <div class="quick-drops">💧💧</div>
+        <div class="quick-value">200</div>
+        <div class="quick-unit">ml</div>
+      </div>
+      <div class="quick-item highlight">
+        <div class="quick-drops">💧💧💧</div>
+        <div class="quick-value">500</div>
+        <div class="quick-unit">ml</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">常用杯型</div>
+      <div class="section-action">+ 自定义</div>
+    </div>
+    <div class="cup-grid">
+      <div class="cup-card"><div class="cup-icon">🥛</div><div class="cup-name">马克杯</div><div class="cup-cap">250ml</div></div>
+      <div class="cup-card"><div class="cup-icon">🧴</div><div class="cup-name">保温杯</div><div class="cup-cap">500ml</div></div>
+      <div class="cup-card"><div class="cup-icon">🍶</div><div class="cup-name">瓶装水</div><div class="cup-cap">550ml</div></div>
+      <div class="cup-card"><div class="cup-icon">🫙</div><div class="cup-name">大瓶装</div><div class="cup-cap">1500ml</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <button class="photo-btn" style="background: #6b7280; box-shadow: none; cursor: not-allowed;">✏️ 自定义输入</button>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">今日记录 (5)</div>
+      <div class="section-action">撤销</div>
+    </div>
+    <div class="records">
+      <div class="record-item">
+        <div class="record-dot"></div>
+        <div class="record-name">保温杯</div>
+        <div class="record-amount">500ml</div>
+        <div class="record-time">10:23</div>
+      </div>
+      <div class="record-item">
+        <div class="record-dot"></div>
+        <div class="record-name">马克杯</div>
+        <div class="record-amount">250ml</div>
+        <div class="record-time">09:15</div>
+      </div>
+      <div class="record-item">
+        <div class="record-dot"></div>
+        <div class="record-name">快速记录</div>
+        <div class="record-amount">200ml</div>
+        <div class="record-time">08:30</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab active"><div class="tab-icon">💧</div>首页</div>
+    <div class="tab"><div class="tab-icon">📊</div>历史</div>
+    <div class="tab"><div class="tab-icon">🏆</div>成就</div>
+    <div class="tab"><div class="tab-icon">👤</div>我的</div>
+  </div>
+</div>
+</body>
+</html>
