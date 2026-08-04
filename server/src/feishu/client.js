@@ -143,12 +143,8 @@ export function buildReminderCard({ nickname, drank, goal, percent, baseUrl, use
           tag: 'div',
           text: {
             tag: 'lark_md',
-            content: `**${nickname || '朋友'}**，起来喝口水吧～\n今日进度 **${drank} / ${goal} ml**（${percent}%）`,
+            content: `**${nickname || '朋友'}**，起来喝口水吧～\n今日进度 **${drank} / ${goal} ml**（${percent}%）\n\n> 小口慢饮，保持好状态 ☺️`,
           },
-        },
-        {
-          tag: 'note',
-          elements: [{ tag: 'plain_text', content: '小口慢饮，保持好状态 ☺️' }],
         },
         {
           tag: 'action',
@@ -182,12 +178,8 @@ export function buildDoneCard({ nickname, drank, goal, percent, baseUrl, justAdd
           tag: 'div',
           text: {
             tag: 'lark_md',
-            content: `**${nickname || '朋友'}**，刚刚记录 **+${justAdded} ml** 🎉\n今日进度 **${drank} / ${goal} ml**（${percent}%）`,
+            content: `**${nickname || '朋友'}**，刚刚记录 **+${justAdded} ml** 🎉\n今日进度 **${drank} / ${goal} ml**（${percent}%）\n\n> 继续保持，下一杯稍后再提醒～`,
           },
-        },
-        {
-          tag: 'note',
-          elements: [{ tag: 'plain_text', content: '继续保持，下一杯稍后再提醒～' }],
         },
         {
           tag: 'action',
