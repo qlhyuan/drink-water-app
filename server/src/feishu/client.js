@@ -131,71 +131,77 @@ export function buildReminderCard({ nickname, drank, goal, percent, baseUrl, use
   }));
 
   return {
-    config: { wide_screen_mode: true, update_multi: true },
+    schema: '2.0', // 飞书卡片 JSON 2.0 = 共享卡片，支持 PATCH
+    config: { wide_screen_mode: true },
     header: {
       template: 'green',
       title: { tag: 'plain_text', content: '💧 该喝水啦' },
     },
-    elements: [
-      {
-        tag: 'div',
-        text: {
-          tag: 'lark_md',
-          content: `**${nickname || '朋友'}**，起来喝口水吧～\n今日进度 **${drank} / ${goal} ml**（${percent}%）`,
-        },
-      },
-      {
-        tag: 'note',
-        elements: [{ tag: 'plain_text', content: '小口慢饮，保持好状态 ☺️' }],
-      },
-      {
-        tag: 'action',
-        actions: [
-          ...quickActions,
-          {
-            tag: 'button',
-            text: { tag: 'plain_text', content: '📝 详细记录' },
-            type: 'primary',
-            url: baseUrl,
+    body: {
+      elements: [
+        {
+          tag: 'div',
+          text: {
+            tag: 'lark_md',
+            content: `**${nickname || '朋友'}**，起来喝口水吧～\n今日进度 **${drank} / ${goal} ml**（${percent}%）`,
           },
-        ],
-      },
-    ],
+        },
+        {
+          tag: 'note',
+          elements: [{ tag: 'plain_text', content: '小口慢饮，保持好状态 ☺️' }],
+        },
+        {
+          tag: 'action',
+          actions: [
+            ...quickActions,
+            {
+              tag: 'button',
+              text: { tag: 'plain_text', content: '📝 详细记录' },
+              type: 'primary',
+              url: baseUrl,
+            },
+          ],
+        },
+      ],
+    },
   };
 }
 
 /** 已记录版卡片：按钮只剩"详细记录"，并展示今日累计 */
 export function buildDoneCard({ nickname, drank, goal, percent, baseUrl, justAdded }) {
   return {
-    config: { wide_screen_mode: true, update_multi: true },
+    schema: '2.0', // 飞书卡片 JSON 2.0 = 共享卡片，支持 PATCH
+    config: { wide_screen_mode: true },
     header: {
       template: 'green',
       title: { tag: 'plain_text', content: '✅ 已记录' },
     },
-    elements: [
-      {
-        tag: 'div',
-        text: {
-          tag: 'lark_md',
-          content: `**${nickname || '朋友'}**，刚刚记录 **+${justAdded} ml** 🎉\n今日进度 **${drank} / ${goal} ml**（${percent}%）`,
-        },
-      },
-      {
-        tag: 'note',
-        elements: [{ tag: 'plain_text', content: '继续保持，下一杯稍后再提醒～' }],
-      },
-      {
-        tag: 'action',
-        actions: [
-          {
-            tag: 'button',
-            text: { tag: 'plain_text', content: '📝 详细记录' },
-            type: 'primary',
-            url: baseUrl,
+    body: {
+      elements: [
+        {
+          tag: 'div',
+          text: {
+            tag: 'lark_md',
+            content: `**${nickname || '朋友'}**，刚刚记录 **+${justAdded} ml** 🎉\n今日进度 **${drank} / ${goal} ml**（${percent}%）`,
           },
-        ],
-      },
-    ],
+        },
+        {
+          tag: 'note',
+          elements: [{ tag: 'plain_text', content: '继续保持，下一杯稍后再提醒～' }],
+        },
+        {
+          tag: 'action',
+          actions: [
+            {
+              tag: 'button',
+              text: { tag: 'plain_text', content: '📝 详细记录' },
+              type: 'primary',
+              url: baseUrl,
+            },
+          ],
+        },
+      ],
+    },
   };
 }
 
