@@ -15,6 +15,7 @@ import statsRoutes from './routes/stats.js';
 import cupRoutes from './routes/cups.js';
 import reminderRoutes from './routes/reminders.js';
 import feishuRoutes from './routes/feishu.js';
+import feishuEventRoutes from './routes/feishuEvent.js';
 import quickRecordRoutes from './routes/quickRecord.js';
 import { notFound, errorHandler } from './middleware/error.js';
 import { bootstrapAdmin } from './bootstrap.js';
@@ -54,6 +55,7 @@ app.use('/api/stats', statsRoutes);
 app.use('/api/cups', cupRoutes);
 app.use('/api/reminders', reminderRoutes);
 app.use('/api/feishu', feishuRoutes);
+app.use('/api/feishu', feishuEventRoutes);
 app.use('/api/quick-record', rateLimit({ windowMs: 60_000, max: 60 }), quickRecordRoutes);
 
 // 可选：托管前端构建产物（同步判断，确保 listen 前已挂载）

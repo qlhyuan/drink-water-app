@@ -120,13 +120,14 @@ export async function sendMessage(openId, msgType, content) {
   return data.data;
 }
 
-/** 提醒消息卡片：展示进度 + 一键记录按钮 + 打开应用 */
-export function buildReminderCard({ nickname, drank, goal, percent, baseUrl, quickLinks = [] }) {
-  const quickActions = (quickLinks || []).map((q) => ({
+/** 提醒消息卡片：展示进度 + 一键记录按钮（回调式） + 打开应用 */
+export function buildReminderCard({ nickname, drank, goal, percent, baseUrl, userId = 0 }) {
+  // 回调式按钮：点击会 POST 到飞书事件订阅接口（不带 url）
+  const quickActions = [100, 200, 500].map((amount) => ({
     tag: 'button',
-    text: { tag: 'plain_text', content: `💧 ${q.amount}ml` },
+    text: { tag: 'plain_text', content: `💧 ${amount}ml` },
     type: 'default',
-    url: q.url,
+    value: { action: 'quick_record', userId, amount },
   }));
 
   return {
@@ -161,6 +162,62 @@ export function buildReminderCard({ nickname, drank, goal, percent, baseUrl, qui
       },
     ],
   };
+}
+
+/** 已记录版卡片：按钮只剩"详细记录"，并展示今日累计 */
+export function buildDoneCard({ nickname, drank, goal, percent, baseUrl, justAdded }) {
+  return {
+    config: { wide_screen_mode: true },
+    header: {
+      template: 'green',
+      title: { tag: 'plain_text', content: '✅ 已记录' },
+    },
+    elements: [
+      {
+        tag: 'div',
+        text: {
+          tag: 'lark_md',
+          content: `**${nickname || '朋友'}**，刚刚记录 **+${justAdded} ml** 🎉\n今日进度 **${drank} / ${goal} ml**（${percent}%）`,
+        },
+      },
+      {
+        tag: 'note',
+        elements: [{ tag: 'plain_text', content: '继续保持，下一杯稍后再提醒～' }],
+      },
+      {
+        tag: 'action',
+        actions: [
+          {
+            tag: 'button',
+            text: { tag: 'plain_text', content: '📝 详细记录' },
+            type: 'primary',
+            url: baseUrl,
+          },
+        ],
+      },
+    ],
+  };
+}
+
+/** PATCH /im/v1/messages/:message_id — 整体替换原卡片 */
+export async function updateMessage(messageId, card) {
+  const token = await getTenantAccessToken();
+  const resp = await fetch(`${FEISHU_BASE}/im/v1/messages/${messageId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      msg_type: 'interactive',
+      content: JSON.stringify(card),
+    }),
+  });
+  const data = await resp.json();
+  if (data.code !== 0) {
+    throw new Error(`飞书卡片更新失败: ${data.code} ${data.msg}`);
+  }
+  return data.data;
 }
 
 // ---------- 辅助 ----------
