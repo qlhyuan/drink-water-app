@@ -7,10 +7,13 @@
 import lark from '@larksuiteoapi/node-sdk';
 import dayjs from 'dayjs';
 import prisma from '../prisma/client.js';
-import { buildDoneCard, isFeishuEnabled } from '../feishu/client.js';
+import { buildDoneCard, isFeishuEnabled, patchCardWithClient } from '../feishu/client.js';
+
+// [BUILD-FP] 方案A：主动 PATCH，不走 SDK 回调
+console.log('[feishu-event] 模块加载，handler v=methodA-active-patch-2026-08-04');
 
 let wsClient = null;
-let larkClient = null; // 用于拿到 tenant_access_token 调更新 API（SDK 已自带，但保险起见保留）
+let larkClient = null; // 用于在 handler 里主动调 im.v1.message.patch
 
 /**
  * 启动飞书长连接客户端
@@ -68,10 +71,11 @@ export function stopFeishuEventListener() {
 }
 
 /**
- * 处理"一键记录"按钮点击
+ * 处理"一键记录"按钮点击 — 方案 A
  * - 校验参数 + 校验操作者身份
  * - 写库
- * - 返回 buildDoneCard() → SDK 自动更新原卡片
+ * - 内部主动调 larkClient.im.v1.message.patch 更新原卡片
+ * - 返回空对象 {}，**完全不走 SDK 那条 WS 响应包路径**
  */
 async function handleQuickRecord(data) {
   try {
@@ -81,6 +85,7 @@ async function handleQuickRecord(data) {
     const value = action.value || {};
     const operator = data?.operator || {};
     const ctx = data?.context || {};
+    const messageId = ctx.open_message_id;
 
     if (value.action !== 'quick_record') {
       return {};
@@ -133,8 +138,11 @@ async function handleQuickRecord(data) {
     const goal = user.goal || 2000;
     const percent = Math.min(100, Math.round((drank / goal) * 100));
 
-    // 返回新卡片 → SDK 会自动更新原消息
-    console.log(`[feishu-event] 已记录 +${amount}ml user=${user.id} 进度=${drank}/${goal}ml`);
+    console.log(
+      `[feishu-event] 已记录 +${amount}ml user=${user.id} 进度=${drank}/${goal}ml messageId=${messageId}`,
+    );
+
+    // 构造新卡片
     const doneCard = buildDoneCard({
       nickname: user.nickname || user.username,
       drank,
@@ -143,11 +151,28 @@ async function handleQuickRecord(data) {
       baseUrl: (process.env.APP_BASE_URL || 'http://localhost:3001').replace(/\/$/, ''),
       justAdded: amount,
     });
-    // 飞书卡片回调响应格式：{ toast, card }，SDK 会 base64 后塞到 WS 响应里
-    return {
-      toast: { type: 'success', content: `已记录 +${amount}ml` },
-      card: doneCard,
-    };
+
+    // === 方案 A 核心：主动 PATCH，不再依赖 SDK 的回调响应 ===
+    // 不论 PATCH 成败，都返回 {}（空响应包，飞书就不会去解析 toast/card）
+    if (messageId && larkClient) {
+      try {
+        await patchCardWithClient(larkClient, messageId, doneCard);
+        console.log(`[feishu-event] PATCH 卡片成功 messageId=${messageId}`);
+      } catch (patchErr) {
+        console.error(
+          `[feishu-event] PATCH 卡片失败 messageId=${messageId}:`,
+          patchErr?.message || patchErr,
+        );
+        // 写库已经成功，PATCH 失败不影响主流程——记录错误让用户感知（飞书会显示 toast）
+      }
+    } else {
+      console.warn(
+        `[feishu-event] 缺少 messageId 或 larkClient，无法 PATCH messageId=${messageId} larkClient=${!!larkClient}`,
+      );
+    }
+
+    // 返回空对象 — 彻底关掉 SDK 的回调响应路径
+    return {};
   } catch (e) {
     console.error('[feishu-event] 处理失败:', e);
     return {};

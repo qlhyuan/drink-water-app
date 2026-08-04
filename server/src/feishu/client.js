@@ -131,7 +131,7 @@ export function buildReminderCard({ nickname, drank, goal, percent, baseUrl, use
   }));
 
   return {
-    config: { wide_screen_mode: true },
+    config: { wide_screen_mode: true, update_multi: true },
     header: {
       template: 'green',
       title: { tag: 'plain_text', content: '💧 该喝水啦' },
@@ -167,7 +167,7 @@ export function buildReminderCard({ nickname, drank, goal, percent, baseUrl, use
 /** 已记录版卡片：按钮只剩"详细记录"，并展示今日累计 */
 export function buildDoneCard({ nickname, drank, goal, percent, baseUrl, justAdded }) {
   return {
-    config: { wide_screen_mode: true },
+    config: { wide_screen_mode: true, update_multi: true },
     header: {
       template: 'green',
       title: { tag: 'plain_text', content: '✅ 已记录' },
@@ -199,7 +199,7 @@ export function buildDoneCard({ nickname, drank, goal, percent, baseUrl, justAdd
   };
 }
 
-/** PATCH /im/v1/messages/:message_id — 整体替换原卡片 */
+/** PATCH /im/v1/messages/:message_id — 整体替换原卡片（用 fetch 路径，给老逻辑用） */
 export async function updateMessage(messageId, card) {
   const token = await getTenantAccessToken();
   const resp = await fetch(`${FEISHU_BASE}/im/v1/messages/${messageId}`, {
@@ -218,6 +218,27 @@ export async function updateMessage(messageId, card) {
     throw new Error(`飞书卡片更新失败: ${data.code} ${data.msg}`);
   }
   return data.data;
+}
+
+/**
+ * 用 SDK 主动 PATCH 卡片（方案 A：handler 不返回值，自己调）
+ * - 走 larkClient.im.v1.message.patch
+ * - 失败抛异常，由调用方决定是否降级
+ */
+export async function patchCardWithClient(larkClient, messageId, card) {
+  if (!larkClient) throw new Error('patchCardWithClient: larkClient 未初始化');
+  if (!messageId) throw new Error('patchCardWithClient: messageId 缺失');
+  const resp = await larkClient.im.v1.message.patch({
+    path: { message_id: messageId },
+    data: {
+      msg_type: 'interactive',
+      content: JSON.stringify(card),
+    },
+  });
+  if (resp?.code !== 0) {
+    throw new Error(`飞书 PATCH 失败: ${resp?.code} ${resp?.msg}`);
+  }
+  return resp.data;
 }
 
 // ---------- 辅助 ----------
