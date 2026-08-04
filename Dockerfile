@@ -16,7 +16,11 @@ COPY server/package*.json ./server/
 # --omit=dev 不装 devDependencies；prisma CLI 单独补装（--no-save 不改 package.json），
 # 供启动时 prisma db push 同步数据库结构使用
 RUN cd server && npm install --omit=dev --no-audit --no-fund \
-    && npm install --no-save --no-audit --no-fund prisma@5.22.0
+    && npm install --no-save --no-audit --no-fund prisma@5.22.0 \
+    # 飞书 SDK 同时打包了 ES + CJS 两份，删 ES 目录节省 ~3.7M
+    && rm -rf node_modules/@larksuiteoapi/node-sdk/es \
+    # protobufjs 有大量本地化文件，实际只用到根目录的少量
+    && rm -rf node_modules/protobufjs/google node_modules/protobufjs/src
 
 # 再拷全部后端源码（含 prisma schema），然后 generate
 COPY server/ ./server/
