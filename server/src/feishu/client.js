@@ -120,8 +120,15 @@ export async function sendMessage(openId, msgType, content) {
   return data.data;
 }
 
-/** 提醒消息卡片：展示进度 + 打开应用按钮 */
-export function buildReminderCard({ nickname, drank, goal, percent, baseUrl }) {
+/** 提醒消息卡片：展示进度 + 一键记录按钮 + 打开应用 */
+export function buildReminderCard({ nickname, drank, goal, percent, baseUrl, quickLinks = [] }) {
+  const quickActions = (quickLinks || []).map((q) => ({
+    tag: 'button',
+    text: { tag: 'plain_text', content: `💧 ${q.amount}ml` },
+    type: 'default',
+    url: q.url,
+  }));
+
   return {
     config: { wide_screen_mode: true },
     header: {
@@ -143,9 +150,10 @@ export function buildReminderCard({ nickname, drank, goal, percent, baseUrl }) {
       {
         tag: 'action',
         actions: [
+          ...quickActions,
           {
             tag: 'button',
-            text: { tag: 'plain_text', content: '📝 去记录喝水' },
+            text: { tag: 'plain_text', content: '📝 详细记录' },
             type: 'primary',
             url: baseUrl,
           },

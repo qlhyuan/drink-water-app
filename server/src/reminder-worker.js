@@ -14,6 +14,7 @@ import {
   sendMessage,
   buildReminderCard,
 } from './feishu/client.js';
+import { buildQuickRecordLinks } from './routes/quickRecord.js';
 
 const TICK_MS = 30_000;
 // 记录今天已推送过的 (userId + HH:MM)，防止同分钟重复推送
@@ -55,12 +56,14 @@ async function tick() {
 
     const { drank, goal } = await todayProgress(user.id, user.goal || 2000);
     const percent = goal > 0 ? Math.round((drank / goal) * 100) : 0;
+    const quickLinks = buildQuickRecordLinks(baseUrl(), user.id);
     const card = buildReminderCard({
       nickname: user.nickname || user.username,
       drank,
       goal,
       percent,
       baseUrl: baseUrl(),
+      quickLinks,
     });
 
     try {

@@ -11,7 +11,7 @@
         <div class="name">{{ auth.user?.nickname || auth.user?.username }}</div>
         <div class="goal">每日目标 {{ auth.user?.goal }} ml</div>
       </div>
-      <van-button size="small" plain hairline @click="showGoal = true">调整目标</van-button>
+      <van-button size="small" plain hairline color="#ffffff" @click="showGoal = true">调整目标</van-button>
     </div>
 
     <div class="menu card">
@@ -134,7 +134,16 @@ async function exportData() {
   border-radius: 16px; padding: 16px 18px; color: white;
   box-shadow: var(--shadow-brand); margin-bottom: 16px;
 }
-.user-card :deep(.van-button) { color: white; border-color: rgba(255,255,255,0.6); }
+.user-card :deep(.van-button) {
+  color: #ffffff !important;
+  background: rgba(255,255,255,0.15) !important;
+  border-color: rgba(255,255,255,0.6) !important;
+  font-weight: 500;
+}
+.user-card :deep(.van-button .van-button__text),
+.user-card :deep(.van-button__text) {
+  color: #ffffff !important;
+}
 .avatar {
   width: 48px; height: 48px; background: rgba(255,255,255,0.25);
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
