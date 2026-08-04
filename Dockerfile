@@ -19,8 +19,9 @@ RUN cd server && npm install --omit=dev --no-audit --no-fund \
     && npm install --no-save --no-audit --no-fund prisma@5.22.0 \
     # 飞书 SDK 同时打包了 ES + CJS 两份，删 ES 目录节省 ~3.7M
     && rm -rf node_modules/@larksuiteoapi/node-sdk/es \
-    # protobufjs 有大量本地化文件，实际只用到根目录的少量
-    && rm -rf node_modules/protobufjs/google node_modules/protobufjs/src
+    # protobufjs 的 google/ 是 google protobuf 描述符扩展，运行不需要
+    # 注意：不能删 src/，minimal.js 会 require('./src/index-minimal')
+    && rm -rf node_modules/protobufjs/google
 
 # 再拷全部后端源码（含 prisma schema），然后 generate
 COPY server/ ./server/
