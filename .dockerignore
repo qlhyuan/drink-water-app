@@ -1,0 +1,23 @@
+# 依赖（镜像内重新安装，禁止把本地 node_modules 打包进镜像）
+node_modules/
+
+# 构建产物（web/dist 由 Dockerfile 内构建，不拷本地）
+dist/
+
+# 本地数据与敏感配置
+data/
+.env
+*.log
+
+# 仓库管理 / 文档 / 截图（与运行无关，减小构建上下文）
+.git/
+.gitignore
+screenshots/
+prototype/
+docs/
+Dockerfile
+docker-compose.yml
+README.md
+FEISHU.md
+*.tar.gz
+*.zip
