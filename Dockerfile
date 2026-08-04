@@ -23,7 +23,11 @@ RUN cd server && npm install --omit=dev --no-audit --no-fund \
     # 注意：不能删 src/，minimal.js 会 require('./src/index-minimal')
     && rm -rf node_modules/protobufjs/google
 
-# 再拷全部后端源码（含 prisma schema），然后 generate
+# 在拷源码前先触发一次 src 拷贝，让 Docker 对源码变更敏感（之前 build cache 命中导致
+# 源码更新不生效，handler 一直是旧版）
+COPY server/src ./server/src
+
+# 再拷全部后端（含 prisma schema / migrations / prisma generate 的输入文件），然后 generate
 COPY server/ ./server/
 
 COPY --from=web-build /app/web/dist ./web/dist
