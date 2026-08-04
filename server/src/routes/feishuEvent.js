@@ -35,6 +35,7 @@ export function startFeishuEventListener() {
   }).register({
     'card.action.trigger_v1': async (data) => {
       console.log('[feishu-event] 收到卡片点击事件');
+      console.log('[feishu-event] data keys:', Object.keys(data || {}));
       return handleQuickRecord(data);
     },
   });
@@ -74,14 +75,15 @@ export function stopFeishuEventListener() {
  */
 async function handleQuickRecord(data) {
   try {
-    const event = data?.event || {};
-    const action = event.action || {};
+    // SDK 已把 schema=2.0 的 header 和 event 平铺到 data 顶层
+    // 字段位置：data.action.value / data.operator / data.context.open_message_id
+    const action = data?.action || {};
     const value = action.value || {};
-    const ctx = event.context || {};
-    const operator = event.operator || {};
+    const operator = data?.operator || {};
+    const ctx = data?.context || {};
 
     if (value.action !== 'quick_record') {
-      return {}; // 不是我们的按钮，原样 200
+      return {};
     }
 
     const userId = Number(value.userId);
@@ -143,6 +145,6 @@ async function handleQuickRecord(data) {
     });
   } catch (e) {
     console.error('[feishu-event] 处理失败:', e);
-    return {}; // 返回空对象表示不更新卡片
+    return {};
   }
 }
