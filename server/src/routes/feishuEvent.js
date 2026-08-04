@@ -33,7 +33,7 @@ export function startFeishuEventListener() {
     encryptKey: process.env.FEISHU_EVENT_ENCRYPT_KEY || '',
     loggerLevel: lark.LoggerLevel.info,
   }).register({
-    'card.action.trigger_v1': async (data) => {
+    'card.action.trigger': async (data) => {
       console.log('[feishu-event] 收到卡片点击事件');
       console.log('[feishu-event] data keys:', Object.keys(data || {}));
       return handleQuickRecord(data);
