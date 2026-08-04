@@ -20,11 +20,9 @@ COPY server/ ./server/
 
 COPY --from=web-build /app/web/dist ./web/dist
 
-ARG JWT_SECRET=change-me-in-production
 ENV NODE_ENV=production \
     PORT=3001 \
     DATABASE_URL="file:../data/prod.db" \
-    JWT_SECRET=${JWT_SECRET} \
     CORS_ORIGIN=""
 
 WORKDIR /app/server

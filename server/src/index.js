@@ -15,6 +15,7 @@ import statsRoutes from './routes/stats.js';
 import cupRoutes from './routes/cups.js';
 import reminderRoutes from './routes/reminders.js';
 import { notFound, errorHandler } from './middleware/error.js';
+import { bootstrapAdmin } from './bootstrap.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -63,6 +64,13 @@ if (fs.existsSync(webDist)) {
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`[server] listening on http://localhost:${PORT}`);
-});
+// 先创建管理员账号（如配置了 ADMIN_*），再监听端口，避免启动瞬间登录请求抢跑
+bootstrapAdmin()
+  .catch((e) => {
+    console.error('[bootstrap] 创建管理员账号失败:', e.message);
+  })
+  .finally(() => {
+    app.listen(PORT, () => {
+      console.log(`[server] listening on http://localhost:${PORT}`);
+    });
+  });

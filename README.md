@@ -31,6 +31,13 @@ docker-compose up -d --build
 # 演示账号: demo / demo1234
 ```
 
+生产部署建议用环境变量直接配置自己的管理员账号（无需手动注册）：
+
+```bash
+# 可选：创建管理员账号（首次启动自动创建，已存在则不覆盖密码）
+ADMIN_USERNAME=admin ADMIN_PASSWORD=your-strong-password docker-compose up -d
+```
+
 ### 本地开发
 
 ```bash
@@ -46,9 +53,14 @@ npm install
 npm run dev        # http://localhost:5173
 ```
 
-### 修改密钥
+### 账号与 JWT 密钥
 
-部署前务必修改 `.env` 或 `docker-compose.yml` 中的 `JWT_SECRET`。
+- **管理员账号**：设置环境变量 `ADMIN_USERNAME` / `ADMIN_PASSWORD`
+  （可选 `ADMIN_NICKNAME`），首次启动时自动创建；账号已存在则跳过，不会覆盖密码。
+- **JWT 密钥**：无需手动生成。未设置 `JWT_SECRET`（或仍为占位值）时，
+  系统启动会自动生成强随机密钥并持久化到 `data/.jwt-secret`，
+  重启 / 重新部署后已登录用户 token 依然有效。
+  仅当需要多实例共享同一密钥时，才需要显式固定 `JWT_SECRET`。
 
 ## API 一览
 

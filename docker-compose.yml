@@ -12,7 +12,14 @@ services:
       PORT: 3001
       # 相对 server/prisma/schema.prisma 解析 → 实际落在 /app/server/data/prod.db
       DATABASE_URL: "file:../data/prod.db"
-      JWT_SECRET: "${JWT_SECRET:-please-change-me-in-production}"
+      # JWT 密钥可选：不设置则系统启动自动生成，并持久化到
+      # /app/server/data/.jwt-secret（数据卷里，重启/重部署不失效）。
+      # 多实例共享时才需要显式固定：
+      # JWT_SECRET: "${JWT_SECRET:-}"
+      # 管理员账号（可选）：设置后首次启动自动创建，已存在时不覆盖密码
+      ADMIN_USERNAME: "${ADMIN_USERNAME:-}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}"
+      ADMIN_NICKNAME: "${ADMIN_NICKNAME:-}"
       CORS_ORIGIN: "${CORS_ORIGIN:-}"
     volumes:
       - drink-water-data:/app/server/data
