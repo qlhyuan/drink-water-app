@@ -8,6 +8,7 @@ import { buildDoneCard, updateMessage } from '../feishu/client.js';
 const router = Router();
 
 const ENCRYPT_KEY = () => process.env.FEISHU_EVENT_ENCRYPT_KEY || '';
+const VERIFICATION_TOKEN = () => process.env.FEISHU_VERIFICATION_TOKEN || '';
 
 /** 解密飞书事件 payload（AES-256-CBC，key 由 encrypt_key 经 SHA256 派生） */
 function decryptPayload(encryptStr) {
@@ -54,9 +55,20 @@ router.post(
     const header = payload?.header || {};
     console.log('[feishu-event] 收到事件 type=', header.event_type, 'event_type=', event?.type);
 
+    // 验签（可选但推荐）：Verification Token 在飞书后台"回调配置"页签里能看到
+    const expectedToken = VERIFICATION_TOKEN();
+    if (expectedToken && header.token && header.token !== expectedToken) {
+      console.warn('[feishu-event] token 校验失败');
+      return res.status(401).json({ code: -1, msg: 'invalid token' });
+    }
+
     // 卡片按钮点击事件：event_type === 'card.action.trigger'，
     // event 结构：{ action: { value: {...} }, context: { open_id, open_message_id }, operator: { open_id } }
-    if (header.event_type === 'card.action.trigger' || event?.type === 'card.action.trigger') {
+    const isCardTrigger =
+      header.event_type === 'card.action.trigger' ||
+      header.event_type === 'card.action.trigger_v1' ||
+      event?.type === 'card.action.trigger';
+    if (isCardTrigger) {
       const action = event.action || {};
       const value = action.value || {};
       const ctx = event.context || {};
