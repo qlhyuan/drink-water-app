@@ -10,7 +10,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3001
-      DATABASE_URL: "file:/app/server/data/prod.db"
+      # 相对 server/prisma/schema.prisma 解析 → 实际落在 /app/server/data/prod.db
+      DATABASE_URL: "file:../data/prod.db"
       JWT_SECRET: "${JWT_SECRET:-please-change-me-in-production}"
       CORS_ORIGIN: "${CORS_ORIGIN:-}"
     volumes:

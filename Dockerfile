@@ -23,13 +23,13 @@ COPY --from=web-build /app/web/dist ./web/dist
 ARG JWT_SECRET=change-me-in-production
 ENV NODE_ENV=production \
     PORT=3001 \
-    DATABASE_URL="file:./data/prod.db" \
+    DATABASE_URL="file:../data/prod.db" \
     JWT_SECRET=${JWT_SECRET} \
     CORS_ORIGIN=""
 
 WORKDIR /app/server
-RUN npx prisma generate && \
-    mkdir -p data && \
+RUN mkdir -p data && \
+    npx prisma generate && \
     npx prisma db push --skip-generate && \
     node src/prisma/seed.js || true
 
