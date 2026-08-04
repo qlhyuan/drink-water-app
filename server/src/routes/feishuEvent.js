@@ -135,7 +135,7 @@ async function handleQuickRecord(data) {
 
     // 返回新卡片 → SDK 会自动更新原消息
     console.log(`[feishu-event] 已记录 +${amount}ml user=${user.id} 进度=${drank}/${goal}ml`);
-    return buildDoneCard({
+    const doneCard = buildDoneCard({
       nickname: user.nickname || user.username,
       drank,
       goal,
@@ -143,6 +143,11 @@ async function handleQuickRecord(data) {
       baseUrl: (process.env.APP_BASE_URL || 'http://localhost:3001').replace(/\/$/, ''),
       justAdded: amount,
     });
+    // 飞书卡片回调响应格式：{ toast, card }，SDK 会 base64 后塞到 WS 响应里
+    return {
+      toast: { type: 'success', content: `已记录 +${amount}ml` },
+      card: doneCard,
+    };
   } catch (e) {
     console.error('[feishu-event] 处理失败:', e);
     return {};
