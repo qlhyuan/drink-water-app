@@ -5,7 +5,7 @@
       <div class="brand">💧 每日喝水</div>
       <nav>
         <router-link v-for="t in tabs" :key="t.path" :to="t.path" class="nav-link">
-          <span class="icon">{{ t.icon }}</span>
+          <span class="icon"><van-icon :name="t.icon" /></span>
           <span>{{ t.label }}</span>
         </router-link>
       </nav>
