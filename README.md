@@ -9,6 +9,7 @@
 - 🎯 智能推荐目标（体重 × 活动 × 环境）
 - 📊 折线趋势 + 时段分布（ECharts）
 - 🔔 浏览器通知 + 智能提醒
+- ✈️ 飞书免登录 + 飞书消息喝水提醒（可选，见 [FEISHU.md](FEISHU.md)）
 - 🏆 9 个成就徽章
 - 📱 响应式（手机 + 桌面）
 - 🔐 JWT 鉴权 + bcrypt 加密
@@ -202,6 +203,9 @@ docker cp drink-water:/app/server/data/backup.db ./backup.db
 | GET | /api/stats/today | 今日 24h 时段分布 |
 | GET / PUT | /api/cups | 自定义杯型 |
 | GET / PUT | /api/reminders | 提醒设置 |
+| GET | /api/feishu/config | 飞书登录配置（是否启用 + 授权 URL） |
+| POST | /api/feishu/bind | 飞书 OAuth 免登录（code 换 token） |
+| POST | /api/feishu/merge | 绑定已有账号到飞书 |
 
 ## 目录结构
 

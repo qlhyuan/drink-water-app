@@ -4,6 +4,8 @@ export const authApi = {
   login: (username, password) => http.post('/auth/login', { username, password }),
   register: (username, password, nickname) =>
     http.post('/auth/register', { username, password, nickname }),
+  feishuConfig: () => http.get('/feishu/config'),
+  feishuBind: (code) => http.post('/feishu/bind', { code }),
 };
 
 export const userApi = {

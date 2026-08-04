@@ -34,6 +34,9 @@
 
     <div class="section">
       <div class="label">提醒方式</div>
+      <van-cell center title="✈️ 飞书消息提醒" :value="feishuBound ? '已开启' : '未绑定'" :label="feishuBound ? '到点推送到你的飞书消息' : '在登录页使用飞书一键登录后自动启用'">
+        <template #right-icon><van-icon name="chat-o" color="#3370ff" /></template>
+      </van-cell>
       <van-cell center title="💬 应用内通知">
         <template #right-icon><van-switch v-model="form.inApp" size="22" /></template>
       </van-cell>
@@ -68,13 +71,14 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue';
 import { showToast } from 'vant';
-import { reminderApi } from '../api';
+import { reminderApi, userApi } from '../api';
 
 const form = reactive({
   enabled: true, interval: 60, startTime: '08:00', endTime: '22:00',
   vibrate: true, dnd: true, inApp: true, browser: false, sound: true, smartMode: true,
 });
 const original = ref(null);
+const feishuBound = ref(false);
 const dirty = computed(() => JSON.stringify(form) !== JSON.stringify(original.value));
 
 const showInterval = ref(false);
@@ -115,6 +119,10 @@ onMounted(async () => {
   const r = await reminderApi.get();
   Object.assign(form, r);
   original.value = { ...form };
+  try {
+    const me = await userApi.me();
+    feishuBound.value = !!me.feishuBound;
+  } catch { /* 忽略 */ }
 });
 </script>
 

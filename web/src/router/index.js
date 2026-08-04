@@ -3,6 +3,7 @@ import { useAuthStore } from '../stores/auth';
 
 const routes = [
   { path: '/login', component: () => import('../views/Login.vue'), meta: { guest: true } },
+  { path: '/feishu/callback', component: () => import('../views/FeishuCallback.vue'), meta: { guest: true } },
   { path: '/onboarding', component: () => import('../views/Onboarding.vue') },
   {
     path: '/',

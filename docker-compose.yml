@@ -20,6 +20,11 @@ services:
       ADMIN_USERNAME: "${ADMIN_USERNAME:-}"
       ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}"
       ADMIN_NICKNAME: "${ADMIN_NICKNAME:-}"
+      # 飞书集成（可选）：配置后启用飞书免登录 + 喝水提醒推送
+      FEISHU_APP_ID: "${FEISHU_APP_ID:-}"
+      FEISHU_APP_SECRET: "${FEISHU_APP_SECRET:-}"
+      FEISHU_REDIRECT_URI: "${FEISHU_REDIRECT_URI:-}"
+      APP_BASE_URL: "${APP_BASE_URL:-}"
       CORS_ORIGIN: "${CORS_ORIGIN:-}"
     volumes:
       - drink-water-data:/app/server/data

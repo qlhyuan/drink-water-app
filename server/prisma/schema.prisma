@@ -18,6 +18,7 @@ model User {
   activity     String?       // sedentary / light / intense
   environment  String?       // ac / normal / outdoor
   goal         Int           @default(2000) // ml
+  feishuOpenId String?       @unique @map("feishu_open_id") // 飞书 open_id，用于免登录 + 消息提醒
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
 

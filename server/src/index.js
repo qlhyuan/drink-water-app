@@ -14,8 +14,10 @@ import recordRoutes from './routes/records.js';
 import statsRoutes from './routes/stats.js';
 import cupRoutes from './routes/cups.js';
 import reminderRoutes from './routes/reminders.js';
+import feishuRoutes from './routes/feishu.js';
 import { notFound, errorHandler } from './middleware/error.js';
 import { bootstrapAdmin } from './bootstrap.js';
+import { startReminderWorker } from './reminder-worker.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -50,6 +52,7 @@ app.use('/api/records', recordRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/cups', cupRoutes);
 app.use('/api/reminders', reminderRoutes);
+app.use('/api/feishu', feishuRoutes);
 
 // 可选：托管前端构建产物（同步判断，确保 listen 前已挂载）
 const webDist = path.resolve(__dirname, '../../web/dist');
@@ -70,6 +73,7 @@ bootstrapAdmin()
     console.error('[bootstrap] 创建管理员账号失败:', e.message);
   })
   .finally(() => {
+    startReminderWorker();
     app.listen(PORT, () => {
       console.log(`[server] listening on http://localhost:${PORT}`);
     });

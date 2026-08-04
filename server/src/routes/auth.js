@@ -62,6 +62,7 @@ function publicUser(u) {
     activity: u.activity,
     environment: u.environment,
     goal: u.goal,
+    feishuBound: !!u.feishuOpenId,
   };
 }
 

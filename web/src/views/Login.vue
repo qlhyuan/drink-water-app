@@ -43,6 +43,22 @@
         @click="submit"
       >{{ mode === 'login' ? '登录' : '注册' }}</van-button>
 
+      <!-- 飞书一键登录（服务端配置 FEISHU_APP_ID 后显示） -->
+      <template v-if="feishuEnabled">
+        <div class="divider"><span>或</span></div>
+        <van-button
+          block
+          round
+          size="large"
+          class="feishu-btn"
+          :loading="feishuLoading"
+          @click="feishuLogin"
+        >
+          <span class="feishu-logo">✈️</span>
+          飞书一键登录
+        </van-button>
+      </template>
+
       <div class="hint center muted">
         演示账号 <b>demo / demo1234</b>
       </div>
@@ -55,6 +71,7 @@ import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { showToast } from 'vant';
 import { useAuthStore } from '../stores/auth';
+import { authApi } from '../api';
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -65,6 +82,32 @@ const username = ref('');
 const password = ref('');
 const nickname = ref('');
 const loading = ref(false);
+const feishuEnabled = ref(false);
+const feishuLoading = ref(false);
+
+// 检测飞书登录是否可用（服务端已配置 FEISHU_APP_ID）
+authApi
+  .feishuConfig()
+  .then((cfg) => {
+    feishuEnabled.value = !!cfg.enabled;
+  })
+  .catch(() => {});
+
+function feishuLogin() {
+  feishuLoading.value = true;
+  authApi
+    .feishuConfig()
+    .then((cfg) => {
+      if (!cfg.enabled || !cfg.authorizeUrl) {
+        feishuLoading.value = false;
+        return showToast('飞书登录暂未启用');
+      }
+      window.location.href = cfg.authorizeUrl;
+    })
+    .catch(() => {
+      feishuLoading.value = false;
+    });
+}
 
 async function submit() {
   if (!username.value || !password.value) {
@@ -100,4 +143,11 @@ async function submit() {
 .form { padding: 0 16px; }
 .form .van-button { margin-top: 24px; }
 .hint { margin-top: 16px; font-size: 12px; }
+.divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0 16px; color: var(--text-secondary, #999); font-size: 12px;
+}
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+.feishu-btn { background: #fff; border: 1px solid #3370ff; color: #3370ff; }
+.feishu-logo { margin-right: 6px; font-size: 16px; }
 </style>

@@ -38,6 +38,13 @@ export const useAuthStore = defineStore('auth', {
       this.user = user;
       localStorage.setItem('token', token);
     },
+    /** 飞书 OAuth 回调：用服务端换好的 token 直接登录 */
+    async loginWithFeishu(code) {
+      const { token, user } = await authApi.feishuBind(code);
+      this.token = token;
+      this.user = user;
+      localStorage.setItem('token', token);
+    },
     logout() {
       this.token = '';
       this.user = null;
