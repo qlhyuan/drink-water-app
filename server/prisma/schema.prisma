@@ -19,6 +19,9 @@ model User {
   environment  String?       // ac / normal / outdoor
   goal         Int           @default(2000) // ml
   feishuOpenId String?       @unique @map("feishu_open_id") // 飞书 open_id，用于免登录 + 消息提醒
+  defaultCupId String?       @map("default_cup_id") // 喝水提醒弹窗的默认杯型 ID，如 "d1"（内置）或自定义杯型数字 ID
+  lastSeenAt          DateTime?      @map("last_seen_at")  // 最后在线时间（用于在线/离线判定）
+  lastAchievementDate String?        @map("last_achievement_date") // 最后达成日期（YYYY-MM-DD），用于去重，同一天只触发一次飞书
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
 
@@ -71,6 +74,7 @@ model ReminderSetting {
   browser      Boolean @default(false)
   sound        Boolean @default(true)
   smartMode    Boolean @default(true)  @map("smart_mode")
+  timezone     String  @default("+08:00") // UTC 偏移，如 "+08:00"、"-05:00"
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)

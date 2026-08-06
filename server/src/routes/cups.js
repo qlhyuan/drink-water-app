@@ -48,6 +48,27 @@ router.post(
   }),
 );
 
+router.put(
+  '/:id',
+  asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    const cup = await prisma.customCup.findFirst({ where: { id, userId: req.user.id } });
+    if (!cup) return res.status(404).json({ error: '杯型不存在' });
+    const data = z
+      .object({
+        name: z.string().min(1).max(16),
+        capacity: z.number().int().min(50).max(3000),
+        emoji: z.string().max(8).optional(),
+      })
+      .parse(req.body);
+    const updated = await prisma.customCup.update({
+      where: { id },
+      data: { name: data.name, capacity: data.capacity, emoji: data.emoji || cup.emoji },
+    });
+    res.json(updated);
+  }),
+);
+
 router.delete(
   '/:id',
   asyncHandler(async (req, res) => {

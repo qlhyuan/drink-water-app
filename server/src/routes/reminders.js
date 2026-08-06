@@ -31,6 +31,7 @@ router.put(
         browser: z.boolean().optional(),
         sound: z.boolean().optional(),
         smartMode: z.boolean().optional(),
+        timezone: z.string().regex(/^[+-]\d{2}:\d{2}$/).optional(),
       })
       .parse(req.body);
     const setting = await prisma.reminderSetting.upsert({

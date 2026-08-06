@@ -15,6 +15,7 @@ const routes = [
       { path: 'achievements', component: () => import('../views/Achievements.vue') },
       { path: 'profile', component: () => import('../views/Profile.vue') },
       { path: 'reminder', component: () => import('../views/Reminder.vue') },
+      { path: 'cups', component: () => import('../views/Cups.vue') },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: '/' },

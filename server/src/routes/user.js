@@ -27,6 +27,7 @@ router.put(
         activity: z.enum(['sedentary', 'light', 'intense']).optional(),
         environment: z.enum(['ac', 'normal', 'outdoor']).optional(),
         goal: z.number().int().min(500).max(5000).optional(),
+        defaultCupId: z.string().max(32).nullable().optional(),
       })
       .parse(req.body);
     const user = await prisma.user.update({ where: { id: req.user.id }, data });
@@ -78,6 +79,7 @@ function publicUser(u) {
     environment: u.environment,
     goal: u.goal,
     feishuBound: !!u.feishuOpenId,
+    defaultCupId: u.defaultCupId,
   };
 }
 

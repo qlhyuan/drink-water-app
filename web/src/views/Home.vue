@@ -67,6 +67,14 @@
     </section>
 
     <RecordSheet v-model:show="showSheet" :default-amount="250" @submit="onSubmit" />
+
+    <!-- 今日目标达成弹窗 -->
+    <AchievementDialog
+      v-model="showAchievement"
+      :nickname="auth.user?.nickname || auth.user?.username || ''"
+      :drank="store.today.total"
+      :goal="store.today.goal"
+    />
   </div>
 </template>
 
@@ -76,12 +84,20 @@ import dayjs from 'dayjs';
 import { showToast } from 'vant';
 import { cupApi } from '../api';
 import { useRecordStore } from '../stores/record';
+import { useAuthStore } from '../stores/auth';
+import { useHeartbeat } from '../composables/useHeartbeat';
 import ProgressRing from '../components/ProgressRing.vue';
 import RecordSheet from '../components/RecordSheet.vue';
+import AchievementDialog from '../components/AchievementDialog.vue';
 
 const store = useRecordStore();
+const auth = useAuthStore();
 const showSheet = ref(false);
+const showAchievement = ref(false);
 const cups = ref([]);
+
+// 启动心跳（仅在页面可见时）
+useHeartbeat();
 
 const encourage = computed(() => {
   const p = store.today.progress;
@@ -94,18 +110,25 @@ const encourage = computed(() => {
 function formatTime(t) { return dayjs(t).format('HH:mm'); }
 
 async function quickAdd(amount, name, emoji) {
-  await store.addRecord({
+  const res = await store.addRecord({
     amount,
     cupType: name || '快速记录',
     cupEmoji: emoji || '💧',
   });
   showToast({ message: `已记录 ${amount}ml`, duration: 1200 });
+  // 后端返回 justAchieved = true 表示今日刚刚首次达成
+  if (res?.justAchieved) {
+    setTimeout(() => (showAchievement.value = true), 600);
+  }
 }
 
 async function onSubmit({ amount, cupType, cupEmoji }) {
-  await store.addRecord({ amount, cupType, cupEmoji });
+  const res = await store.addRecord({ amount, cupType, cupEmoji });
   showSheet.value = false;
   showToast({ message: `已记录 ${amount}ml`, duration: 1200 });
+  if (res?.justAchieved) {
+    setTimeout(() => (showAchievement.value = true), 600);
+  }
 }
 
 async function remove(id) {

@@ -26,6 +26,9 @@ services:
       FEISHU_REDIRECT_URI: "${FEISHU_REDIRECT_URI:-}"
       APP_BASE_URL: "${APP_BASE_URL:-}"
       CORS_ORIGIN: "${CORS_ORIGIN:-}"
+      # 服务器时区（影响日志时间戳、今日统计边界等）
+      # 提醒 Worker 已使用用户存储的时区偏移，此处主要影响其他时间相关逻辑
+      TZ: "${TZ:-Asia/Shanghai}"
       # 飞书事件加密密钥（可选，长连接模式 SDK 内部解密使用）— 飞书后台"事件与回调"页面获取
       FEISHU_EVENT_ENCRYPT_KEY: "${FEISHU_EVENT_ENCRYPT_KEY:-}"
     volumes:

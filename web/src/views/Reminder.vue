@@ -87,6 +87,7 @@ import { refreshReminder } from '../utils/reminder';
 const form = reactive({
   enabled: true, interval: 60, startTime: '08:00', endTime: '22:00',
   vibrate: true, dnd: true, inApp: true, browser: false, sound: true, smartMode: true,
+  timezone: formatTimezoneOffset(),
 });
 const original = ref(null);
 const feishuBound = ref(false);
@@ -121,10 +122,22 @@ async function requestNotif(val) {
 }
 
 async function save() {
-  await reminderApi.update(form);
-  original.value = { ...form };
+  // 自动附带浏览器时区偏移，确保后端提醒 worker 能正确判断用户本地时间
+  const tzOffset = formatTimezoneOffset();
+  await reminderApi.update({ ...form, timezone: tzOffset });
+  original.value = { ...form, timezone: tzOffset };
   await refreshReminder(); // 让全局调度器立即采用新时段/间隔
   showToast('已保存');
+}
+
+/** 获取浏览器 UTC 偏移，格式 "+HH:MM" 或 "-HH:MM" */
+function formatTimezoneOffset() {
+  const offset = -new Date().getTimezoneOffset(); // 分钟，东半球为正
+  const sign = offset >= 0 ? '+' : '-';
+  const abs = Math.abs(offset);
+  const h = String(Math.floor(abs / 60)).padStart(2, '0');
+  const m = String(abs % 60).padStart(2, '0');
+  return `${sign}${h}:${m}`;
 }
 
 onMounted(async () => {

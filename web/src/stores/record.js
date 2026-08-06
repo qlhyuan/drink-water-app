@@ -23,8 +23,9 @@ export const useRecordStore = defineStore('record', {
       }
     },
     async addRecord({ amount, cupType, cupEmoji }) {
-      await recordApi.add({ amount, cupType, cupEmoji });
+      const res = await recordApi.add({ amount, cupType, cupEmoji });
       await this.fetchToday();
+      return res; // 返回后端响应（含 justAchieved / achievementSent）
     },
     async removeRecord(id) {
       await recordApi.remove(id);

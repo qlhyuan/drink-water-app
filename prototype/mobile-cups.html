@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>杯型管理 - 原型</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .page { padding: 0 0 80px; background: var(--bg); min-height: 100%; }
+  .topbar { display: flex; align-items: center; padding: 14px 16px; background: white; position: sticky; top: 0; z-index: 10; }
+  .topbar-back { font-size: 20px; color: var(--text); cursor: pointer; margin-right: 12px; }
+  .topbar-title { font-size: 16px; font-weight: 600; flex: 1; }
+
+  /* 提示横幅 */
+  .hint-banner { margin: 12px 16px; padding: 12px 14px; background: #ecfdf5; border-radius: 12px; display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: #065f46; line-height: 1.5; }
+  .hint-banner .emoji { font-size: 16px; flex-shrink: 0; }
+
+  /* 区块 */
+  .section { margin: 16px 0; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 0 16px 10px; }
+  .section-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+  .section-desc { font-size: 11px; color: var(--text-tertiary); }
+
+  /* 默认杯型列表 */
+  .cup-list { background: white; margin: 0 16px; border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+  .cup-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid #f3f4f6; gap: 12px; }
+  .cup-item:last-child { border-bottom: none; }
+  .cup-emoji { font-size: 28px; width: 44px; height: 44px; background: var(--bg); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .cup-info { flex: 1; }
+  .cup-name { font-size: 14px; font-weight: 600; }
+  .cup-cap { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .cup-tag { font-size: 10px; background: var(--brand-light); color: var(--brand-dark); padding: 2px 8px; border-radius: 99px; font-weight: 500; }
+
+  /* 自定义杯型 */
+  .custom-cup-item { display: flex; align-items: center; padding: 14px 16px; border-bottom: 1px solid #f3f4f6; gap: 12px; }
+  .custom-cup-item:last-child { border-bottom: none; }
+  .cup-actions { display: flex; gap: 8px; }
+  .cup-action-btn { width: 32px; height: 32px; border-radius: 8px; border: none; background: var(--bg); cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .cup-action-btn.delete { background: #fef2f2; color: #ef4444; }
+
+  /* 添加按钮 */
+  .add-btn { margin: 12px 16px; padding: 14px; background: white; border: 2px dashed var(--border); border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+  .add-btn:hover { border-color: var(--brand); color: var(--brand); background: #ecfdf5; }
+  .add-btn .plus { font-size: 18px; font-weight: 700; }
+
+  /* 弹窗 */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .modal { background: white; width: 85%; max-width: 380px; border-radius: 18px; padding: 24px 20px 28px; }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; text-align: center; }
+  .modal-close { position: absolute; top: 16px; right: 16px; font-size: 18px; color: var(--text-tertiary); cursor: pointer; }
+
+  /* 表单 */
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; display: block; }
+  .form-input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; outline: none; transition: border-color 0.15s; }
+  .form-input:focus { border-color: var(--brand); }
+
+  /* Emoji 选择器 */
+  .emoji-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+  .emoji-option { width: 40px; height: 40px; border-radius: 10px; border: 2px solid transparent; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: all 0.15s; }
+  .emoji-option.selected { border-color: var(--brand); background: var(--brand-light); }
+
+  .submit-btn { width: 100%; padding: 14px; background: var(--brand); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+  .submit-btn:active { opacity: 0.9; }
+
+  /* 空状态 */
+  .empty-state { text-align: center; padding: 32px 16px; color: var(--text-tertiary); }
+  .empty-emoji { font-size: 36px; margin-bottom: 8px; }
+  .empty-text { font-size: 13px; }
+
+  /* 底部提示 */
+  .footer-note { text-align: center; padding: 20px 16px; font-size: 11px; color: var(--text-tertiary); line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="page">
+  <!-- 顶栏 -->
+  <div class="topbar">
+    <div class="topbar-back">‹</div>
+    <div class="topbar-title">杯型管理</div>
+  </div>
+
+  <!-- 提示 -->
+  <div class="hint-banner">
+    <span class="emoji">💡</span>
+    <span>首页快速记录区会显示已启用的默认杯型和你添加的自定义杯型，点击即可一键记录。</span>
+  </div>
+
+  <!-- 默认杯型 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">默认杯型</div>
+      <div class="section-desc">系统内置，不可删除</div>
+    </div>
+    <div class="cup-list">
+      <div class="cup-item">
+        <div class="cup-emoji">🥛</div>
+        <div class="cup-info">
+          <div class="cup-name">马克杯</div>
+          <div class="cup-cap">250 ml</div>
+        </div>
+        <div class="cup-tag">默认</div>
+      </div>
+      <div class="cup-item">
+        <div class="cup-emoji">🧴</div>
+        <div class="cup-info">
+          <div class="cup-name">保温杯</div>
+          <div class="cup-cap">500 ml</div>
+        </div>
+        <div class="cup-tag">默认</div>
+      </div>
+      <div class="cup-item">
+        <div class="cup-emoji">🍶</div>
+        <div class="cup-info">
+          <div class="cup-name">瓶装水</div>
+          <div class="cup-cap">550 ml</div>
+        </div>
+        <div class="cup-tag">默认</div>
+      </div>
+      <div class="cup-item">
+        <div class="cup-emoji">🫙</div>
+        <div class="cup-info">
+          <div class="cup-name">大瓶装</div>
+          <div class="cup-cap">1500 ml</div>
+        </div>
+        <div class="cup-tag">默认</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 自定义杯型 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">我的杯型</div>
+      <div class="section-desc">已添加 2 个</div>
+    </div>
+    <div class="cup-list">
+      <div class="custom-cup-item">
+        <div class="cup-emoji">☕</div>
+        <div class="cup-info">
+          <div class="cup-name">咖啡杯</div>
+          <div class="cup-cap">180 ml</div>
+        </div>
+        <div class="cup-actions">
+          <button class="cup-action-btn">✏️</button>
+          <button class="cup-action-btn delete">🗑️</button>
+        </div>
+      </div>
+      <div class="custom-cup-item">
+        <div class="cup-emoji">🍵</div>
+        <div class="cup-info">
+          <div class="cup-name">茶杯</div>
+          <div class="cup-cap">300 ml</div>
+        </div>
+        <div class="cup-actions">
+          <button class="cup-action-btn">✏️</button>
+          <button class="cup-action-btn delete">🗑️</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 添加按钮 -->
+    <div class="add-btn" onclick="document.getElementById('addModal').style.display='flex'">
+      <span class="plus">+</span>
+      <span>添加自定义杯型</span>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    自定义杯型会出现在首页快速记录区<br>方便你一键记录日常饮水
+  </div>
+</div>
+
+<!-- 添加杯型弹窗 -->
+<div class="modal-overlay" id="addModal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal">
+    <div class="modal-close" onclick="document.getElementById('addModal').style.display='none'">✕</div>
+    <div class="modal-title">添加自定义杯型</div>
+
+    <div class="form-group">
+      <label class="form-label">选择图标</label>
+      <div class="emoji-picker">
+        <div class="emoji-option selected">🥤</div>
+        <div class="emoji-option">☕</div>
+        <div class="emoji-option">🍵</div>
+        <div class="emoji-option">🍺</div>
+        <div class="emoji-option">🥛</div>
+        <div class="emoji-option">💧</div>
+        <div class="emoji-option">🧃</div>
+        <div class="emoji-option">🍹</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">杯型名称</label>
+      <input class="form-input" type="text" placeholder="如：我的水壶" maxlength="16">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">容量（ml）</label>
+      <input class="form-input" type="number" placeholder="如：350" min="50" max="3000">
+    </div>
+
+    <button class="submit-btn">添加杯型</button>
+  </div>
+</div>
+
+</body>
+</html>

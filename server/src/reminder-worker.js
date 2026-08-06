@@ -37,7 +37,6 @@ async function tick() {
     sentToday.clear();
     lastDate = dateKey;
   }
-  const hhmm = now.toTimeString().slice(0, 5); // "HH:MM"
 
   const settings = await prisma.reminderSetting.findMany({
     where: { enabled: true },
@@ -47,13 +46,16 @@ async function tick() {
   for (const s of settings) {
     const { user } = s;
     if (!user.feishuOpenId) continue; // 未绑定飞书，无法推送
+
+    // 使用用户存储的时区偏移计算其本地时间
+    const hhmm = getUserLocalHHMM(now, s.timezone);
     if (!isReminderMoment(hhmm, s.startTime, s.endTime, s.interval)) continue;
 
     const key = `${user.id}:${dateKey}:${hhmm}`;
     if (sentToday.has(key)) continue;
     sentToday.add(key);
 
-    const { drank, goal } = await todayProgress(user.id, user.goal || 2000);
+    const { drank, goal } = await todayProgress(user.id, user.goal || 2000, s.timezone);
     const percent = goal > 0 ? Math.round((drank / goal) * 100) : 0;
     const card = buildReminderCard({
       nickname: user.nickname || user.username,
@@ -76,6 +78,18 @@ async function tick() {
   }
 }
 
+/**
+ * 根据用户存储的 UTC 偏移（如 "+08:00"）计算其本地 HH:MM
+ * 解决 Docker 容器默认 UTC 与用户本地时间不一致的问题
+ */
+function getUserLocalHHMM(utcNow, tzOffset) {
+  const sign = tzOffset.startsWith('-') ? -1 : 1;
+  const [h, m] = tzOffset.slice(1).split(':').map(Number);
+  const offsetMs = sign * (h * 60 + m) * 60 * 1000;
+  const local = new Date(utcNow.getTime() + offsetMs);
+  return local.toTimeString().slice(0, 5); // "HH:MM"
+}
+
 /** 判断当前 HH:MM 是否是用户的提醒时刻 */
 function isReminderMoment(hhmm, startTime, endTime, intervalMin) {
   if (!startTime || !endTime || !intervalMin || intervalMin <= 0) return false;
@@ -89,10 +103,17 @@ function isReminderMoment(hhmm, startTime, endTime, intervalMin) {
   return (curMin - startMin) % intervalMin === 0;
 }
 
-/** 今日累计喝水量 */
-async function todayProgress(userId, goal) {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
+/** 今日累计喝水量（使用用户时区计算当日起点） */
+async function todayProgress(userId, goal, tzOffset) {
+  const now = new Date();
+  const sign = tzOffset.startsWith('-') ? -1 : 1;
+  const [h, m] = tzOffset.slice(1).split(':').map(Number);
+  const offsetMs = sign * (h * 60 + m) * 60 * 1000;
+  const userNow = new Date(now.getTime() + offsetMs);
+  const userTodayStart = new Date(userNow);
+  userTodayStart.setUTCHours(0, 0, 0, 0);
+  // 转换回 UTC 时间戳用于数据库查询
+  const start = new Date(userTodayStart.getTime() - offsetMs);
   const agg = await prisma.drinkRecord.aggregate({
     where: { userId, recordedAt: { gte: start } },
     _sum: { amount: true },

@@ -190,6 +190,42 @@ export function buildDoneCard({ nickname, drank, goal, percent, baseUrl, justAdd
   };
 }
 
+/** 达成激励卡片：今日目标已完成，发送庆祝消息 */
+export function buildAchievementCard({ nickname, drank, goal, baseUrl, streakDays = 0 }) {
+  return {
+    schema: '2.0',
+    config: { wide_screen_mode: true },
+    header: {
+      template: 'green',
+      title: { tag: 'plain_text', content: '🎉 今日目标已达成！' },
+    },
+    body: {
+      elements: [
+        {
+          tag: 'div',
+          text: {
+            tag: 'lark_md',
+            content: `**${nickname || '朋友'}**，太棒了！\n今日累计 **${drank} / ${goal} ml**，100% 完成 ✨\n\n> 多喝水，多健康，明天继续加油 💧${
+              streakDays > 1 ? `\n\n🔥 已连续达成 **${streakDays}** 天` : ''
+            }`,
+          },
+        },
+        {
+          tag: 'action',
+          actions: [
+            {
+              tag: 'button',
+              text: { tag: 'plain_text', content: '📊 查看今日详情' },
+              type: 'primary',
+              url: baseUrl,
+            },
+          ],
+        },
+      ],
+    },
+  };
+}
+
 // ---------- 辅助 ----------
 function getBaseUrl() {
   return (process.env.APP_BASE_URL || 'http://localhost:3001').replace(/\/$/, '');

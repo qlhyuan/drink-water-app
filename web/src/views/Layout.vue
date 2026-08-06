@@ -19,15 +19,20 @@
     </main>
 
     <!-- 移动端底部 tabbar -->
-    <van-tabbar v-if="!isDesktop" v-model="activeTab" route active-color="var(--brand)">
-      <van-tabbar-item v-for="t in tabs" :key="t.path" :to="t.path" :icon="t.icon">{{ t.label }}</van-tabbar-item>
+    <van-tabbar v-if="!isDesktop" v-model="activeTab" active-color="var(--brand)">
+      <van-tabbar-item
+        v-for="(t, i) in tabs"
+        :key="t.path"
+        :icon="t.icon"
+        @click="onTabClick(t, i)"
+      >{{ t.label }}</van-tabbar-item>
     </van-tabbar>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const tabs = [
   { path: '/', label: '首页', icon: 'home-o' },
@@ -37,9 +42,28 @@ const tabs = [
 ];
 const activeTab = ref(0);
 const isDesktop = ref(window.innerWidth >= 768);
+const route = useRoute();
+const router = useRouter();
+
 const onResize = () => (isDesktop.value = window.innerWidth >= 768);
 onMounted(() => window.addEventListener('resize', onResize));
 onUnmounted(() => window.removeEventListener('resize', onResize));
+
+// 根据当前路由同步 activeTab
+function syncTabFromRoute() {
+  const idx = tabs.findIndex((t) => t.path === route.path);
+  // 只在路由属于 tabbar 列表时才同步索引，否则保持当前索引（避免其他页面跳一下高亮）
+  if (idx >= 0) activeTab.value = idx;
+}
+watch(() => route.path, syncTabFromRoute, { immediate: true });
+
+// 点击 tabbar 项手动跳转（避免 Vant 默认的“已激活不响应”逻辑）
+function onTabClick(t, i) {
+  activeTab.value = i;
+  if (route.path !== t.path) {
+    router.push(t.path);
+  }
+}
 </script>
 
 <style scoped>

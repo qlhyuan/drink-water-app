@@ -29,10 +29,15 @@ export const statsApi = {
 export const cupApi = {
   list: () => http.get('/cups'),
   add: (data) => http.post('/cups', data),
+  update: (id, data) => http.put(`/cups/${id}`, data),
   remove: (id) => http.delete(`/cups/${id}`),
 };
 
 export const reminderApi = {
   get: () => http.get('/reminders'),
   update: (data) => http.put('/reminders', data),
+};
+
+export const heartbeatApi = {
+  ping: () => http.post('/heartbeat'),
 };

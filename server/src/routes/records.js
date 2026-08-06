@@ -4,6 +4,11 @@ import dayjs from 'dayjs';
 import prisma from '../prisma/client.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { authMiddleware } from '../middleware/auth.js';
+import {
+  isFeishuEnabled,
+  sendMessage,
+  buildAchievementCard,
+} from '../feishu/client.js';
 
 const router = Router();
 router.use(authMiddleware);
@@ -45,6 +50,29 @@ router.post(
       })
       .parse(req.body);
 
+    // 计算「今日」起点（使用用户时区）
+    const settings = await prisma.reminderSetting.findUnique({ where: { userId: req.user.id } });
+    const tz = settings?.timezone || '+08:00';
+    const nowMs = Date.now();
+    const sign = tz.startsWith('-') ? -1 : 1;
+    const [hh, mm] = tz.slice(1).split(':').map(Number);
+    const offsetMs = sign * (hh * 60 + mm) * 60 * 1000;
+    const localNow = new Date(nowMs + offsetMs);
+    const dayStart = new Date(
+      Date.UTC(localNow.getUTCFullYear(), localNow.getUTCMonth(), localNow.getUTCDate(), 0, 0, 0) -
+        offsetMs,
+    );
+    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000 - 1);
+
+    // 插入前：今日旧总量 + goal
+    const beforeAgg = await prisma.drinkRecord.aggregate({
+      _sum: { amount: true },
+      where: { userId: req.user.id, recordedAt: { gte: dayStart, lte: dayEnd } },
+    });
+    const beforeTotal = beforeAgg._sum.amount || 0;
+    const beforeAchieved = beforeTotal >= req.user.goal;
+
+    // 插入记录
     const record = await prisma.drinkRecord.create({
       data: {
         userId: req.user.id,
@@ -54,7 +82,48 @@ router.post(
         recordedAt: data.recordedAt ? new Date(data.recordedAt) : undefined,
       },
     });
-    res.status(201).json(record);
+
+    // 插入后：今日新总量
+    const afterTotal = beforeTotal + data.amount;
+    const afterAchieved = afterTotal >= req.user.goal;
+    const justAchieved = !beforeAchieved && afterAchieved;
+    const today = dayjs().format('YYYY-MM-DD');
+
+    // 如果刚达成：更新去重字段 + 后台发飞书
+    let achievementSent = false;
+    if (justAchieved) {
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { lastAchievementDate: today },
+      });
+      // 异步发飞书（不影响接口响应）
+      const feishuOpenId = req.user.feishuOpenId;
+      if (feishuOpenId && isFeishuEnabled()) {
+        try {
+          const card = buildAchievementCard({
+            nickname: req.user.nickname,
+            drank: afterTotal,
+            goal: req.user.goal,
+            baseUrl: process.env.APP_BASE_URL || 'http://localhost:5173',
+          });
+          await sendMessage(feishuOpenId, 'interactive', card);
+          achievementSent = true;
+        } catch (e) {
+          console.warn('[achievement] 飞书发送失败:', e.message);
+        }
+      }
+    }
+
+    res.status(201).json({
+      ...record,
+      progress: {
+        drank: afterTotal,
+        goal: req.user.goal,
+        percent: Math.min(100, Math.round((afterTotal / req.user.goal) * 100)),
+      },
+      justAchieved,
+      achievementSent,
+    });
   }),
 );
 

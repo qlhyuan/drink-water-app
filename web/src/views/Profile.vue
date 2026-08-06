@@ -17,7 +17,7 @@
     <div class="menu card">
       <van-cell title="🎯 每日目标" :value="`${auth.user?.goal} ml`" is-link @click="showGoal = true" />
       <van-cell title="🔔 喝水提醒" is-link to="/reminder" />
-      <van-cell title="🥤 自定义杯型" is-link @click="showCup = true" />
+      <van-cell title="🥤 杯型管理" is-link to="/cups" />
       <van-cell title="📊 数据导出" is-link @click="exportData" />
       <van-cell title="ℹ️ 关于" is-link @click="about = true" />
     </div>
@@ -34,23 +34,6 @@
       <van-button block round type="primary" size="large" style="margin-top: 20px;" @click="saveGoal">保存</van-button>
     </van-popup>
 
-    <!-- 自定义杯型 -->
-    <van-popup v-model:show="showCup" position="bottom" round :style="{ padding: '20px', maxHeight: '70%' }">
-      <div class="popup-title">自定义杯型</div>
-      <van-cell-group inset>
-        <div v-for="c in customs" :key="c.id" class="cup-row">
-          <span>{{ c.emoji }} {{ c.name }}</span>
-          <span class="muted">{{ c.capacity }}ml</span>
-          <van-icon name="cross" @click="removeCup(c.id)" />
-        </div>
-      </van-cell-group>
-      <van-form @submit="addCup" class="cup-form">
-        <van-field v-model="cupForm.name" label="名称" placeholder="如：水壶" />
-        <van-field v-model="cupForm.capacity" label="容量" placeholder="ml" type="number" />
-        <van-button block type="primary" native-type="submit">添加</van-button>
-      </van-form>
-    </van-popup>
-
     <van-dialog v-model:show="about" title="每日喝水">
       <div style="padding: 16px;">
         版本 v1.0.0 · 单容器 Docker 部署<br>
@@ -65,45 +48,23 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { showToast, showConfirmDialog } from 'vant';
 import { useAuthStore } from '../stores/auth';
-import { cupApi, userApi } from '../api';
+import { userApi } from '../api';
 
 const auth = useAuthStore();
 const router = useRouter();
 const showGoal = ref(false);
-const showCup = ref(false);
 const about = ref(false);
 const tempGoal = ref(2000);
-const customs = ref([]);
-const cupForm = ref({ name: '', capacity: 250 });
 
 onMounted(async () => {
   if (auth.user) tempGoal.value = auth.user.goal;
-  await loadCups();
 });
-
-async function loadCups() {
-  const { customs } = await cupApi.list();
-  customs.value = customs;
-}
 
 async function saveGoal() {
   await userApi.update({ goal: tempGoal.value });
   await auth.refreshUser();
   showGoal.value = false;
   showToast('已保存');
-}
-
-async function addCup() {
-  if (!cupForm.value.name || !cupForm.value.capacity) return;
-  await cupApi.add({ name: cupForm.value.name, capacity: Number(cupForm.value.capacity) });
-  cupForm.value = { name: '', capacity: 250 };
-  await loadCups();
-  showToast('已添加');
-}
-
-async function removeCup(id) {
-  await cupApi.remove(id);
-  await loadCups();
 }
 
 async function logout() {
@@ -159,8 +120,4 @@ async function exportData() {
 .popup-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
 .popup-value { text-align: center; font-size: 40px; font-weight: 700; color: var(--brand); margin-bottom: 16px; }
 .popup-value small { font-size: 14px; color: var(--text-secondary); margin-left: 4px; font-weight: 400; }
-
-.cup-row { display: flex; align-items: center; padding: 10px 16px; border-bottom: 1px solid #f3f4f6; gap: 12px; }
-.cup-row span:first-child { flex: 1; font-size: 14px; }
-.cup-form { margin-top: 12px; }
 </style>
