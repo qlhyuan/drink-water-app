@@ -1,6 +1,9 @@
 services:
   drink-water:
-    image: ghcr.io/qlhyuan/drink-water-app:latest
+    # 镜像来源：默认 ghcr.io（GitHub 构建产物）；国内拉取慢可切换到阿里云 ACR：
+    # 1. 在 .env 里配置 ALIYUN_IMAGE=registry.cn-hangzhou.aliyuncs.com/<命名空间>/drink-water-app:latest
+    # 2. 再执行 docker compose up -d --pull always
+    image: "${ALIYUN_IMAGE:-ghcr.io/qlhyuan/drink-water-app:latest}"
     # 如需本地构建，注释掉 image 行，取消下面注释：
     # build: .
     container_name: drink-water
