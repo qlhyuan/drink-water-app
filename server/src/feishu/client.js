@@ -122,15 +122,8 @@ export async function sendMessage(openId, msgType, content) {
 
 /** 提醒消息卡片：展示进度 + 一键记录按钮（回调式） + 打开应用 */
 export function buildReminderCard({ nickname, drank, goal, percent, baseUrl, userId = 0 }) {
-  // 回调式按钮：点击会 POST 到飞书事件订阅接口（不带 url）
-  // 2.0 已废弃 action 容器，button 直接放 elements 里，用 margin 控制间距
-  const quickButtons = [100, 200, 500].map((amount, i) => ({
-    tag: 'button',
-    text: { tag: 'plain_text', content: `💧 ${amount}ml` },
-    type: 'default',
-    margin: i === 0 ? '8px 0 4px 0' : '4px 0', // 第一个按钮加 8px 上间距
-    value: { action: 'quick_record', userId, amount },
-  }));
+  // 与弹窗一致：一个"记录一杯水"主按钮，默认 250ml
+  const DEFAULT_AMOUNT = 250;
 
   return {
     schema: '2.0', // 飞书卡片 JSON 2.0 = 共享卡片，支持 PATCH
@@ -148,11 +141,17 @@ export function buildReminderCard({ nickname, drank, goal, percent, baseUrl, use
             content: `**${nickname || '朋友'}**，起来喝口水吧～\n今日进度 **${drank} / ${goal} ml**（${percent}%）\n\n> 小口慢饮，保持好状态 ☺️`,
           },
         },
-        ...quickButtons,
+        {
+          tag: 'button',
+          text: { tag: 'plain_text', content: `💧 记录一杯水 +${DEFAULT_AMOUNT}ml` },
+          type: 'primary',
+          margin: '8px 0 4px 0',
+          value: { action: 'quick_record', userId, amount: DEFAULT_AMOUNT },
+        },
         {
           tag: 'button',
           text: { tag: 'plain_text', content: '📝 详细记录' },
-          type: 'primary',
+          type: 'default',
           margin: '4px 0',
           url: baseUrl,
         },
@@ -161,14 +160,14 @@ export function buildReminderCard({ nickname, drank, goal, percent, baseUrl, use
   };
 }
 
-/** 已记录版卡片：按钮只剩"详细记录"，并展示今日累计 */
+/** 已处理版卡片：按钮变灰，展示今日累计，不再可操作 */
 export function buildDoneCard({ nickname, drank, goal, percent, baseUrl, justAdded }) {
   return {
-    schema: '2.0', // 飞书卡片 JSON 2.0 = 共享卡片，支持 PATCH
+    schema: '2.0',
     config: { wide_screen_mode: true },
     header: {
       template: 'green',
-      title: { tag: 'plain_text', content: '✅ 已记录' },
+      title: { tag: 'plain_text', content: '✅ 已处理' },
     },
     body: {
       elements: [
@@ -176,61 +175,19 @@ export function buildDoneCard({ nickname, drank, goal, percent, baseUrl, justAdd
           tag: 'div',
           text: {
             tag: 'lark_md',
-            content: `**${nickname || '朋友'}**，刚刚记录 **+${justAdded} ml** 🎉\n今日进度 **${drank} / ${goal} ml**（${percent}%）\n\n> 继续保持，下一杯稍后再提醒～`,
+            content: `**${nickname || '朋友'}**，已记录 **+${justAdded} ml** ✅\n今日进度 **${drank} / ${goal} ml**（${percent}%）\n\n> 已处理，下一杯稍后再提醒～`,
           },
         },
         {
           tag: 'button',
-          text: { tag: 'plain_text', content: '📝 详细记录' },
-          type: 'primary',
+          text: { tag: 'plain_text', content: '📝 查看详情' },
+          type: 'default',
           margin: '8px 0 0 0',
           url: baseUrl,
         },
       ],
     },
   };
-}
-
-/** PATCH /im/v1/messages/:message_id — 整体替换原卡片（用 fetch 路径，给老逻辑用） */
-export async function updateMessage(messageId, card) {
-  const token = await getTenantAccessToken();
-  const resp = await fetch(`${FEISHU_BASE}/im/v1/messages/${messageId}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      msg_type: 'interactive',
-      content: JSON.stringify(card),
-    }),
-  });
-  const data = await resp.json();
-  if (data.code !== 0) {
-    throw new Error(`飞书卡片更新失败: ${data.code} ${data.msg}`);
-  }
-  return data.data;
-}
-
-/**
- * 用 SDK 主动 PATCH 卡片（方案 A：handler 不返回值，自己调）
- * - 走 larkClient.im.v1.message.patch
- * - 失败抛异常，由调用方决定是否降级
- */
-export async function patchCardWithClient(larkClient, messageId, card) {
-  if (!larkClient) throw new Error('patchCardWithClient: larkClient 未初始化');
-  if (!messageId) throw new Error('patchCardWithClient: messageId 缺失');
-  const resp = await larkClient.im.v1.message.patch({
-    path: { message_id: messageId },
-    data: {
-      msg_type: 'interactive',
-      content: JSON.stringify(card),
-    },
-  });
-  if (resp?.code !== 0) {
-    throw new Error(`飞书 PATCH 失败: ${resp?.code} ${resp?.msg}`);
-  }
-  return resp.data;
 }
 
 // ---------- 辅助 ----------

@@ -27,9 +27,19 @@
     <div class="section">
       <div class="label">提醒时段</div>
       <div class="time-range">
-        <van-cell clickable center :title="form.startTime" @click="pickStart" />
-        <van-cell clickable center :title="form.endTime" @click="pickEnd" />
+        <div class="time-box" @click="pickStart">
+          <div class="time-label">开始</div>
+          <div class="time-value">{{ form.startTime }}</div>
+          <div class="time-edit">点击修改 <van-icon name="arrow" /></div>
+        </div>
+        <div class="time-sep">至</div>
+        <div class="time-box" @click="pickEnd">
+          <div class="time-label">结束</div>
+          <div class="time-value">{{ form.endTime }}</div>
+          <div class="time-edit">点击修改 <van-icon name="arrow" /></div>
+        </div>
       </div>
+      <div class="time-hint">将在该时段内每 {{ form.interval }} 分钟提醒一次</div>
     </div>
 
     <div class="section">
@@ -72,6 +82,7 @@
 import { ref, reactive, onMounted, computed } from 'vue';
 import { showToast } from 'vant';
 import { reminderApi, userApi } from '../api';
+import { refreshReminder } from '../utils/reminder';
 
 const form = reactive({
   enabled: true, interval: 60, startTime: '08:00', endTime: '22:00',
@@ -112,6 +123,7 @@ async function requestNotif(val) {
 async function save() {
   await reminderApi.update(form);
   original.value = { ...form };
+  await refreshReminder(); // 让全局调度器立即采用新时段/间隔
   showToast('已保存');
 }
 
@@ -138,6 +150,15 @@ onMounted(async () => {
 .smart-card .d { font-size: 12px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5; }
 .section { background: white; margin: 12px 0; }
 .label { font-size: 11px; color: var(--text-tertiary); padding: 8px 16px; letter-spacing: 0.5px; }
-.time-range { display: flex; }
-.time-range :deep(.van-cell) { flex: 1; }
+.time-range { display: flex; align-items: center; padding: 0 16px 4px; gap: 10px; }
+.time-box {
+  flex: 1; background: var(--bg); border: 2px solid transparent; border-radius: 12px;
+  padding: 12px; text-align: center; cursor: pointer;
+}
+.time-box:active { border-color: var(--brand); background: var(--brand-light); }
+.time-label { font-size: 11px; color: var(--text-secondary); }
+.time-value { font-size: 22px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.time-edit { font-size: 11px; color: var(--brand); margin-top: 4px; }
+.time-sep { color: var(--text-tertiary); font-size: 13px; flex-shrink: 0; }
+.time-hint { font-size: 11px; color: var(--text-tertiary); padding: 8px 16px 12px; }
 </style>
