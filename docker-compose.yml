@@ -34,6 +34,14 @@ services:
       TZ: "${TZ:-Asia/Shanghai}"
       # 飞书事件加密密钥（可选，长连接模式 SDK 内部解密使用）— 飞书后台"事件与回调"页面获取
       FEISHU_EVENT_ENCRYPT_KEY: "${FEISHU_EVENT_ENCRYPT_KEY:-}"
+      # AI 个性化建议（可选）：不设置时首页 AI 卡片走推荐文案
+      AI_PROVIDER: "${AI_PROVIDER:-}"
+      AI_API_KEY: "${AI_API_KEY:-}"
+      AI_BASE_URL: "${AI_BASE_URL:-}"
+      AI_MODEL: "${AI_MODEL:-}"
+      AI_TIMEOUT_MS: "${AI_TIMEOUT_MS:-15000}"
+      # 首页天气默认城市（可选）：未设置时浏览器自动 IP 定位
+      DEFAULT_WEATHER_CITY: "${DEFAULT_WEATHER_CITY:-}"
     volumes:
       - drink-water-data:/app/server/data
 

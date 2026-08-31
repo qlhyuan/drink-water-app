@@ -9,6 +9,8 @@
 - 🎯 智能推荐目标（体重 × 活动 × 环境）
 - 📊 折线趋势 + 时段分布（ECharts）
 - 🔔 浏览器通知 + 智能提醒
+- 🤖 AI 个性化饮水建议（可选，DeepSeek / 通义千问 / OpenAI）
+- 🌤 首页实时天气（Open-Meteo）+ 自动 IP 定位 + Meteocons 动画图标
 - ✈️ 飞书免登录 + 飞书消息喝水提醒（可选，见 [FEISHU.md](FEISHU.md)）
 - 🏆 9 个成就徽章
 - 📱 响应式（手机 + 桌面）
@@ -17,10 +19,13 @@
 
 ## 技术栈
 
-- **前端**：Vue 3 + Vite + Pinia + Vant 4 + ECharts
+- **前端**：Vue 3 + Vite + Pinia + Vant 4 + ECharts + Meteocons
 - **后端**：Node.js 20 + Express + Prisma + JWT
+- **AI**：DeepSeek（默认）/ 通义千问 / OpenAI（OpenAI 兼容协议）
+- **天气**：Open-Meteo（无需 API Key）+ 正向地理编码
+- **定位**：ip-api.com 代理 + 浏览器 Geolocation（混合模式）
 - **数据库**：SQLite（单文件，零运维）
-- **部署**：单容器 Docker
+- **部署**：单容器 Docker，支持 GHCR + 阿里云 ACR 双镜像
 
 ## 快速开始
 
@@ -62,6 +67,34 @@ npm run dev        # http://localhost:5173
   系统启动会自动生成强随机密钥并持久化到 `data/.jwt-secret`，
   重启 / 重新部署后已登录用户 token 依然有效。
   仅当需要多实例共享同一密钥时，才需要显式固定 `JWT_SECRET`。
+
+## 高级特性
+
+### 🤖 AI 个性化建议（可选）
+
+首页“AI 小贴士”卡片会根据用户当天饮水进度、体重目标、时段生成 3 条个性化建议。
+
+- **不配置 API Key 也能用**：默认返回精选推荐语料，不会报错
+- **配置后启用**：填入 `AI_PROVIDER` + `AI_API_KEY`，调用的为 OpenAI 兼容协议
+- **Provider 速查**：
+
+  | provider | baseURL | 默认模型 | 申请地址 |
+  |----------|---------|----------|----------|
+  | `deepseek`（默认） | `https://api.deepseek.com/v1` | `deepseek-chat` | https://platform.deepseek.com/ |
+  | `qwen` | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-plus` | https://dashscope.console.aliyun.com/ |
+  | `openai` | `https://api.openai.com/v1` | `gpt-4o-mini` | https://platform.openai.com/ |
+
+- **调用参数**：`temperature=0.7`，`max_tokens=500`，超时 15s
+- **Prompt 风格**：幽默、有温度，「该喝水了朋友」那种调皮语气（见 `server/src/ai/prompts/advice.js`）
+- **缓存**：同一个用户同一天的 advice 会缓存 1 小时，避免重复调用费钱
+- **手动刷新**：首页右上角 “🔄 换一批” 按钮可传 `fresh=1` 跳过缓存
+
+### 🌤 首页天气
+
+- **默认城市**：未设置 `DEFAULT_WEATHER_CITY` 时，浏览器自动调用 IP 定位（后端 `/api/geo/ip`）
+- **手动选择**：点击首页状态行右侧的「📍城市名」药丸按钮，浏览器会请求位置授权
+- **天气数据源**：[Open-Meteo](https://open-meteo.com/)（无需 API Key，免费）
+- **图标**：[Meteocons](https://meteocons.com/) SVG 动画（内置 SMIL，零运行时），可动态染色
 
 ## 部署
 
@@ -144,6 +177,19 @@ docker run -d \
 | `PORT` | 否 | `3001` | 容器内服务端口 |
 | `DATABASE_URL` | 否 | `file:../data/prod.db` | SQLite 路径（一般不用改） |
 | `NODE_ENV` | 否 | `production` | 运行环境 |
+| `TZ` | 否 | `Asia/Shanghai` | 服务器时区 |
+| `FEISHU_APP_ID` | 否 | - | 飞书 App ID（见 [FEISHU.md](FEISHU.md)） |
+| `FEISHU_APP_SECRET` | 否 | - | 飞书 App Secret |
+| `FEISHU_REDIRECT_URI` | 否 | - | 飞书授权回调地址 |
+| `FEISHU_EVENT_ENCRYPT_KEY` | 否 | - | 飞书事件加密密钥（长连接模式） |
+| `APP_BASE_URL` | 否 | - | 应用对外地址（提醒卡片跳转） |
+| `ALIYUN_IMAGE` | 否 | ghcr.io | 镜像加速：设置阿里云 ACR 地址 |
+| `AI_PROVIDER` | 否 | `deepseek` | LLM provider：`deepseek` / `qwen` / `openai` |
+| `AI_API_KEY` | 否 | - | LLM API Key。**留空时首页 AI 卡片走推荐语料**，不会报错 |
+| `AI_BASE_URL` | 否 | provider 默认 | 自定义 OpenAI 兼容 API 地址 |
+| `AI_MODEL` | 否 | provider 默认 | 自定义模型名 |
+| `AI_TIMEOUT_MS` | 否 | `15000` | LLM 调用超时（毫秒） |
+| `DEFAULT_WEATHER_CITY` | 否 | 自动 IP 定位 | 首页天气默认城市（如 “北京”） |
 
 ### 数据持久化
 
@@ -207,6 +253,11 @@ docker cp drink-water:/app/server/data/backup.db ./backup.db
 | GET | /api/stats/today | 今日 24h 时段分布 |
 | GET / PUT | /api/cups | 自定义杯型 |
 | GET / PUT | /api/reminders | 提醒设置 |
+| GET | /api/ai/config | AI 服务状态（是否启用 + provider） |
+| GET | /api/ai/advice?fresh=1 | 生成个性化饮水建议（DeepSeek/Qwen/OpenAI） |
+| GET | /api/weather?city=NAME | 按城市查实时天气 |
+| GET | /api/weather?lat=X&lon=Y | 按坐标查实时天气 |
+| GET | /api/geo/ip | IP 反查城市（首加载默认） |
 | GET | /api/feishu/config | 飞书登录配置（是否启用 + 授权 URL） |
 | POST | /api/feishu/bind | 飞书 OAuth 免登录（code 换 token） |
 | POST | /api/feishu/merge | 绑定已有账号到飞书 |
@@ -215,29 +266,39 @@ docker cp drink-water:/app/server/data/backup.db ./backup.db
 
 ```
 drink-water-web/
-├── server/             # Express + Prisma 后端
+├── server/                 # Express + Prisma 后端
 │   ├── prisma/
 │   ├── src/
-│   │   ├── routes/     # auth / user / records / stats / cups / reminders
-│   │   ├── middleware/ # auth + error
-│   │   └── prisma/     # client + seed
-│   └── data/           # SQLite 文件（运行时生成）
-├── web/                # Vue 3 + Vite 前端
+│   │   ├── routes/         # auth / user / records / stats / cups / reminders / ai / weather / geo
+│   │   ├── middleware/     # auth + error
+│   │   ├── ai/             # LLM client + prompt 模板 + 缓存
+│   │   ├── feishu/         # 飞书 SDK 封装
+│   │   ├── prisma/         # client + seed
+│   │   └── reminder-worker.js
+│   └── data/               # SQLite 文件（运行时生成）
+├── web/                    # Vue 3 + Vite 前端
 │   ├── src/
-│   │   ├── views/      # Login / Home / History / Achievements / Profile / ...
-│   │   ├── components/ # ProgressRing / RecordSheet
-│   │   ├── stores/     # Pinia
-│   │   ├── api/        # axios 封装
+│   │   ├── views/          # Login / Home / History / Achievements / Profile / ...
+│   │   ├── components/     # ProgressRing / RecordSheet / WeatherIcon
+│   │   ├── composables/    # useWeather
+│   │   ├── stores/         # Pinia
+│   │   ├── api/            # axios 封装
 │   │   └── router/
-│   └── dist/           # 构建产物
-├── prototype/          # 原型 HTML（独立）
-├── Dockerfile          # 单容器构建
+│   └── dist/               # 构建产物
+├── prototype/              # 原型 HTML（独立）
+├── .github/workflows/      # CI：Docker 双镜像发布（GHCR + ACR）
+├── Dockerfile              # 单容器构建
 ├── docker-compose.yml
-└── .env.example        # compose 环境变量模板（复制为 .env 使用）
+└── .env.example            # compose 环境变量模板（复制为 .env 使用）
 ```
 
 ## 路线图
 
+- [x] AI 个性化饮水建议（DeepSeek/Qwen/OpenAI）
+- [x] 首页实时天气 + 自动 IP 定位
+- [x] 成就徽章 + 飞书卡片推送
+- [x] 提醒时区处理（用户级时区）
+- [x] 默认杯型自动关联提醒
 - [ ] PWA 离线支持
 - [ ] 暗色模式
 - [ ] 多语言（i18n）
