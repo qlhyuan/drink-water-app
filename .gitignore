@@ -7,3 +7,7 @@ data/
 prototype-v2.tar.gz
 prototype.tar.gz
 prototype-html.tar.gz
+
+# 临时调试截图（agent/手动验证用，不入库）
+# 已跟踪的关键截图（home.png/login.png 等）不受影响
+/screenshots/

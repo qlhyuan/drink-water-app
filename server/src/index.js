@@ -17,6 +17,9 @@ import reminderRoutes from './routes/reminders.js';
 import feishuRoutes from './routes/feishu.js';
 import quickRecordRoutes from './routes/quickRecord.js';
 import heartbeatRoutes from './routes/heartbeat.js';
+import aiRoutes from './routes/ai.js';
+import weatherRoutes from './routes/weather.js';
+import geoRoutes from './routes/geo.js';
 import { notFound, errorHandler } from './middleware/error.js';
 import { bootstrapAdmin } from './bootstrap.js';
 import { startReminderWorker } from './reminder-worker.js';
@@ -58,6 +61,9 @@ app.use('/api/reminders', reminderRoutes);
 app.use('/api/feishu', feishuRoutes);
 app.use('/api/quick-record', rateLimit({ windowMs: 60_000, max: 60 }), quickRecordRoutes);
 app.use('/api/heartbeat', heartbeatRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/weather', weatherRoutes);
+app.use('/api/geo', geoRoutes);
 
 // 可选：托管前端构建产物（同步判断，确保 listen 前已挂载）
 const webDist = path.resolve(__dirname, '../../web/dist');

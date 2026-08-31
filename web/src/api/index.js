@@ -41,3 +41,18 @@ export const reminderApi = {
 export const heartbeatApi = {
   ping: () => http.post('/heartbeat'),
 };
+
+export const aiApi = {
+  config: () => http.get('/ai/config'),
+  advice: (fresh = false) => http.get('/ai/advice', { params: fresh ? { fresh: 1 } : {} }),
+};
+
+export const weatherApi = {
+  byCity: (city) => http.get('/weather', { params: { city } }),
+  byCoords: (lat, lon) => http.get('/weather', { params: { lat, lon } }),
+};
+
+export const geoApi = {
+  // IP 反查城市（后端代理 ip-api.com）
+  byIp: () => http.get('/geo/ip'),
+};
