@@ -45,13 +45,19 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: true
           # 同时推送到 GHCR（主仓库）和阿里云 ACR（国内加速，配了 secrets 才推）
           tags: |
             ghcr.io/${{ env.IMAGE_NAME }}:latest
             ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ secrets.ALIYUN_REGISTRY != '' && format('{0}/{1}/drink-water-app:latest', secrets.ALIYUN_REGISTRY, secrets.ALIYUN_NAMESPACE) || '' }}
             ${{ secrets.ALIYUN_REGISTRY != '' && format('{0}/{1}/drink-water-app:{2}', secrets.ALIYUN_REGISTRY, secrets.ALIYUN_NAMESPACE, github.sha) || '' }}
+          # 关键修复：强制使用 Docker Schema 2 manifest（oci-mediatypes=false），
+          # 避免 buildx 默认推送 application/vnd.oci.empty.v1+json 多镜像占位 manifest，
+          # 该格式阿里云 ACR 不识别（denied: unknown manifest class）。
+          outputs: type=image,push=true,oci-mediatypes=false
+          # 关闭 provenance/sbom：避免额外 attestations manifest（也是 OCI 格式，会被 ACR 拒）
+          provenance: false
+          sbom: false
           # 之前 cache-from: type=gha 在 buildx 5+ 上会回退到从 ghcr.io 拉 cache 镜像，
           # 触发 "denied: denied"（匿名读私有 namespace 被拒）。直接关掉 cache，
           # 镜像 build 只需 ~1 分钟，缓存收益不大。
